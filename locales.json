@@ -1,0 +1,14 @@
+{
+    "ru": {
+        "experience": "Опыт работы",
+        "education": "Образование",
+        "skills": "Навыки",
+        "contacts": "Контакты"
+    },
+    "en": {
+        "experience": "Work Experience",
+        "education": "Education",
+        "skills": "Skills",
+        "contacts": "Contacts"
+    }
+}

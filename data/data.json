@@ -1,0 +1,49 @@
+{
+    "name": "Name Surname",
+    "email": "email@example.com",
+    "city": "Moscow",
+    "photo": "data/photo.png",
+    "birth_date": "01.01.2000",
+    "github": "https://github.com/",
+    "education": [
+        [
+            "date_from-date_to",
+            "Educational institution",
+            "Specialty"
+        ],
+        [
+            "2023–2027",
+            "Moscow State University",
+            "Somputer Science"
+        ],
+        [
+            "2026",
+            "Aboba IT School",
+            "Backend development in Java"
+        ],
+        [
+            "2025",
+            "Python development cources",
+            "Backend-development in Django"
+        ]
+    ],
+    "work_experience": [
+        [
+            "date_from-date_to",
+            "Company name",
+            "Position",
+            "Description of responsibilities"
+        ],
+        [
+            "2020–2025",
+            "Google",
+            "CEO",
+            "I managed Google and made an active contribution to the development of the company"
+        ]
+    ],
+    "skills": {
+        "Git": "high",
+        "Python": "mid",
+        "SQL": "low"
+    }
+}
