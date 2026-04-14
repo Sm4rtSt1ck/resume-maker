@@ -74,6 +74,7 @@ Resume data is stored in a JSON file. `data.json` is used by default.
     "birth_date": "01.01.2000",
     "work_formats": ["office", "hybrid", "remote"],
     "github": "https://github.com/username",
+    "telegram": "your_tag_without_at",
     "photo": "photo.png",
     "hobbies": ["Computer games", "Swimming", "Sleeping"],
     "about": "I'm good boy, meow meow...",

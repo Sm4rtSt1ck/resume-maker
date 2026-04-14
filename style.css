@@ -112,6 +112,7 @@ body {
   color: var(--sidebar-fg);
   text-decoration: none;
   transition: border-color 0.2s;
+  font-size: 13px;
 }
 
 /* Contacts */
@@ -243,14 +244,14 @@ body {
 }
 
 .entry-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   margin-bottom: 6px;
   line-height: 1.4;
 }
 
 .entry-desc {
-  font-size: 12.5px;
+  font-size: 13.5px;
   line-height: 1.65;
   color: #444;
 }

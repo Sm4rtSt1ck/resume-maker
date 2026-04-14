@@ -26,6 +26,10 @@
         {% endfor %}
       </div>
 
+      {% if birth_date %}
+      <span>{{ birth_date }}</span>
+      {% endif %}
+
       <div class="sidebar-position">{{ position }}</div>
 
       <div class="divider"></div>
@@ -42,14 +46,20 @@
       <div class="sidebar-section">
         <h2 class="sidebar-label">{{ t.contacts }}</h2>
         <ul class="contact-list">
-          <li>
-            <span class="contact-icon">✦</span>
-            <span>{{ birth_date }}</span>
-          </li>
           {% if github %}
           <li>
             <span class="contact-icon">✦</span>
-            <a href="{{ github }}" target="_blank">GitHub</a>
+            GitHub: 
+            <a href="{{ github }}" target="_blank">
+              {{ github.replace("https://", "").replace("http://", "").replace("github.com/", "").replace("/", "") }}
+            </a>
+          </li>
+          {% endif %}
+          {% if telegram %}
+          <li>
+            <span class="contact-icon">✦</span>
+            Telegram: 
+            <a href="https://t.me/{{ telegram }}" target="_blank">@{{ telegram }}</a>
           </li>
           {% endif %}
           {% if phone %}

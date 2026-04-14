@@ -1,14 +1,19 @@
 {
-    "name": "Name Surname",
-    "email": "email@example.com",
-    "phone": "+12345678910",
-    "city": "Moscow",
     "photo": "data/photo.png",
+    "name": "Name Surname",
     "birth_date": "01.01.2000",
+
+    "phone": "+12345678910",
+    "email": "email@example.com",
+    "github": "https://github.com/YourUserName",
+    "telegram": "your_tag_without_at",
+    "city": "Moscow",
+
     "work_formats": ["office", "hybrid", "remote"],
-    "github": "https://github.com/",
-    "hobbies": ["Computer games", "Swimming", "Sleeping"],
+
     "about": "I'm good boy, meow meow...",
+    "hobbies": ["Computer games", "Swimming", "Sleeping"],
+
     "education": [
         [
             "date_from-date_to",
@@ -35,6 +40,7 @@
             "Bla bla bla bla bla bla bla..."
         ]
     ],
+
     "work_experience": [
         [
             "date_from-date_to",
@@ -49,6 +55,7 @@
             "I managed Google and made an active contribution to the development of the company"
         ]
     ],
+
     "skills": {
         "Git": "high",
         "Python": "mid",
