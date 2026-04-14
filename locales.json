@@ -3,12 +3,22 @@
         "experience": "Опыт работы",
         "education": "Образование",
         "skills": "Навыки",
-        "contacts": "Контакты"
+        "contacts": "Контакты",
+        "office": "Офис",
+        "hybrid": "Гибрид",
+        "remote": "Удалённый",
+        "hobbies": "Увлечения",
+        "about": "О себе"
     },
     "en": {
         "experience": "Work Experience",
         "education": "Education",
         "skills": "Skills",
-        "contacts": "Contacts"
+        "contacts": "Contacts",
+        "office": "Office",
+        "hybrid": "Hybrid",
+        "remote": "Remote",
+        "hobbies": "Hobbies",
+        "about": "About me"
     }
 }

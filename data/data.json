@@ -1,30 +1,38 @@
 {
     "name": "Name Surname",
     "email": "email@example.com",
+    "phone": "+12345678910",
     "city": "Moscow",
     "photo": "data/photo.png",
     "birth_date": "01.01.2000",
+    "work_formats": ["office", "hybrid", "remote"],
     "github": "https://github.com/",
+    "hobbies": ["Computer games", "Swimming", "Sleeping"],
+    "about": "I'm good boy, meow meow...",
     "education": [
         [
             "date_from-date_to",
             "Educational institution",
-            "Specialty"
+            "Specialty",
+            "Description (may be empty)"
         ],
         [
             "2023–2027",
             "Moscow State University",
-            "Somputer Science"
+            "Somputer Science",
+            ""
         ],
         [
             "2026",
             "Aboba IT School",
-            "Backend development in Java"
+            "Backend development in Java",
+            "Bla bla bla..."
         ],
         [
             "2025",
             "Python development cources",
-            "Backend-development in Django"
+            "Backend-development in Django",
+            "Bla bla bla bla bla bla bla..."
         ]
     ],
     "work_experience": [
@@ -32,7 +40,7 @@
             "date_from-date_to",
             "Company name",
             "Position",
-            "Description of responsibilities"
+            "Description of responsibilities (may be empty)"
         ],
         [
             "2020–2025",

@@ -29,6 +29,15 @@
       <div class="sidebar-position">{{ position }}</div>
 
       <div class="divider"></div>
+      
+      {% if about %}
+      <div class="sidebar-section">
+        <h2 class="sidebar-label">{{ t.about }}</h2>
+        <div class="about">{{ about }}</div>
+      </div>
+
+      <div class="divider"></div>
+      {% endif %}
 
       <div class="sidebar-section">
         <h2 class="sidebar-label">{{ t.contacts }}</h2>
@@ -37,10 +46,18 @@
             <span class="contact-icon">✦</span>
             <span>{{ birth_date }}</span>
           </li>
+          {% if github %}
           <li>
             <span class="contact-icon">✦</span>
             <a href="{{ github }}" target="_blank">GitHub</a>
           </li>
+          {% endif %}
+          {% if phone %}
+          <li>
+            <span class="contact-icon">✦</span>
+            <a href="tel:{{ phone }}">{{ phone }}</a>
+          </li>
+          {% endif %}
           {% if email %}
           <li>
             <span class="contact-icon">✦</span>
@@ -53,11 +70,21 @@
             <span>{{ city }}</span>
           </li>
           {% endif %}
+          {% if work_formats %}
+            <li>
+              <span class="contact-icon">✦</span>
+              <span>
+                {% for item in work_formats %}
+                  {{ t[item] if t[item] is defined else item }}{{ " • " if not loop.last }}
+                {% endfor %}
+              </span>
+            </li>
+          {% endif %}
         </ul>
       </div>
 
       <div class="divider"></div>
-
+      
       <div class="sidebar-section">
         <h2 class="sidebar-label">{{ t.skills }}</h2>
         <ul class="skills-list">
@@ -69,7 +96,23 @@
           {% endfor %}
         </ul>
       </div>
-
+      
+      {% if hobbies %}
+      <div class="divider"></div>
+      
+      <div class="sidebar-section">
+        <h2 class="sidebar-label">{{ t.hobbies }}</h2>
+        <ul class="contact-list">
+          {% for hobby in hobbies %}
+          <li>
+            <span class="contact-icon">✦</span>
+            <span>{{ hobby }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+        
     </aside>
 
     <main class="content">
@@ -91,7 +134,7 @@
         {% endfor %}
       </section>
       {% endif %}
-
+      
       <section class="section">
         <h2 class="section-title">{{ t.education }}</h2>
         {% for edu in education %}
@@ -101,6 +144,7 @@
             <span class="entry-company">{{ edu[1] }}</span>
           </div>
           <div class="entry-title">{{ edu[2] }}</div>
+          <div class="entry-desc">{{ edu[3] }}</div>
         </div>
         {% endfor %}
       </section>

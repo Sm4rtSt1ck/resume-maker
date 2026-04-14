@@ -69,25 +69,31 @@ Resume data is stored in a JSON file. `data.json` is used by default.
 {
     "name": "John Doe",
     "email": "john@mail.com",
+    "phone": "+12345678910",
     "city": "Moscow",
     "birth_date": "01.01.2000",
+    "work_formats": ["office", "hybrid", "remote"],
     "github": "https://github.com/username",
     "photo": "photo.png",
+    "hobbies": ["Computer games", "Swimming", "Sleeping"],
+    "about": "I'm good boy, meow meow...",
     "education": [
-        ["2020–2024", "University", "Specialty"]
+        ["2020–2024", "University", "Specialty", "Description (may be empty)"]
     ],
     "work_experience": [
-        ["2023–2024", "Company", "Position", "Description of responsibilities"]
+        ["2023–2024", "Company", "Position", "Description of responsibilities (may be empty)"]
     ],
     "skills": {
         "Python": "high",
-        "SQL": "mid",
-        "Git": "high"
+        "SQL": "low",
+        "Git": "mid"
     }
 }
 ```
 
-Skill levels: `high`, `mid`, `low`.
+Skill levels: `high`, `mid`, `low`\
+Work formats: `office`, `hybrid`, `remote`, this list can be empty\
+The phone number may not be specified; for this, the quotes must be blank
 
 ## Usage
 

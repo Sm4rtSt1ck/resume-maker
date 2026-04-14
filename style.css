@@ -106,6 +106,14 @@ body {
   margin-bottom: 14px;
 }
 
+/* About */
+
+.about {
+  color: var(--sidebar-fg);
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+
 /* Contacts */
 
 .contact-list {
