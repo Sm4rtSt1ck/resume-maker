@@ -1,6 +1,6 @@
 # Resume maker
 
-HTML resume generator based on Jinja2 templates. Quickly create tailored resumes for different job positions by swapping out data files.
+HTML resume generator based on Jinja2 templates. Quickly make tailored resumes for different job positions by swapping out data files.
 
 ## Project Structure
 
@@ -91,16 +91,16 @@ Skill levels: `high`, `mid`, `low`.
 
 ## Usage
 
-#### Create a resume
+#### Make a resume
 
 ```bash
-python remaker.py create "Python Developer"
+python remaker.py make "Python Developer"
 ```
 
 With a custom data file:
 
 ```bash
-python remaker.py create "Python Developer" -dp data_yandex.json
+python remaker.py make "Python Developer" -dp data_yandex.json
 ```
 
 Output is saved to `output/resume_python_developer.html`.
@@ -119,7 +119,7 @@ python remaker.py lang en
 
 ```bash
 python main.py --help
-python main.py create --help
+python main.py make --help
 ```
 
 ## Dependencies

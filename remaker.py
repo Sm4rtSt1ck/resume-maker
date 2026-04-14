@@ -99,7 +99,7 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
 
     subparsers = parser.add_subparsers(dest="command")
 
-    create_parser = subparsers.add_parser("create", help="Create resume from data file")
+    create_parser = subparsers.add_parser("make", help="Make resume from data file")
     create_parser.add_argument("position", help="Job position name")
     create_parser.add_argument("-dp", "--data_path", default=f"{config.get("data_path", "data/data.json")}", help=f"Path to data file")
 
@@ -123,7 +123,7 @@ def main():
         parser.print_help()
         sys.exit(1)
 
-    if args.command == "create":
+    if args.command == "make":
         command_create(args, config)
     elif args.command == "lang":
         command_lang(args, config)
