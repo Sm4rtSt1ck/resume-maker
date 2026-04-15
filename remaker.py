@@ -4,6 +4,8 @@ import json
 import base64
 import argparse
 import mimetypes
+import webbrowser
+import subprocess
 
 from pathlib import Path
 
@@ -67,6 +69,19 @@ def command_create(args: argparse.Namespace, config: dict):
 
     output_file = generate_html(data, config)
     print(f"Done: {output_file}")
+
+    path_obj = Path(output_file).resolve()
+    if sys.platform == 'win32':
+        os.startfile(str(path_obj))
+    else:
+        file_url = path_obj.as_uri()
+        if sys.platform == 'darwin':
+            subprocess.Popen(['open', file_url])
+        else:
+            try:
+                subprocess.Popen(['xdg-open', file_url])
+            except OSError:
+                webbrowser.open(file_url)
 
 
 def command_lang(args: argparse.Namespace, config: dict):
