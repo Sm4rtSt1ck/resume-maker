@@ -34,36 +34,16 @@ python -m venv venv
 source venv/bin/activate
 
 # Windows
-venv\Scripts\activate
+venv\Scripts\activate.bat
 ```
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Configuration
-
-**`config.json`:**
-
-```json
-{
-    "output_path": "output/",
-    "style_path": "style.css",
-    "data_path": "data/data.json",
-    "lang": "en"
-}
-```
-
-| Field | Description |
-|---|---|
-| `output_path` | folder for generated resumes |
-| `style_path` | path to the stylesheet |
-| `data_path` | path to resume data |
-| `lang` | resume language (`ru` / `en`) |
-
 ## Resume Data
 
-Resume data is stored in a JSON file. `data.json` is used by default.
+Resume data and photo are stored in a JSON file in directory `data/`. `data.json` and `photo.png` are used by default.
 
 ```json
 {
@@ -96,6 +76,31 @@ Skill levels: `high`, `mid`, `low`\
 Work formats: `office`, `hybrid`, `remote`, this list can be empty\
 The phone number may not be specified; for this, the quotes must be blank
 
+
+## Configuration
+
+**`config.json`:**
+
+```json
+{
+    "output_path": "output/",
+    "style_path": "style.css",
+    "data_path": "data/data.json",
+    "lang": "en"
+}
+```
+
+You can use commands for configuration.
+
+| Command | Field | Description |
+|---|---|---|
+| output | `output_path` | folder for generated resumes |
+| data | `data_path` | path to resume data |
+| lang | `lang` | resume language (`ru` / `en`) |
+
+
+
+
 ## Usage
 
 #### Make a resume
@@ -107,10 +112,10 @@ python remaker.py make "Python Developer"
 With a custom data file:
 
 ```bash
-python remaker.py make "Python Developer" -dp data_yandex.json
+python remaker.py make "Python Developer" -dp your_data_file_name
 ```
 
-Output is saved to `output/resume_python_developer.html`.
+Data is stored in `data/FILE_NAME.json`.
 
 #### Change language
 
@@ -120,6 +125,19 @@ python remaker.py lang
 
 # set language
 python remaker.py lang en
+```
+
+#### Change output path
+
+```bash
+# show current output path
+python remaker.py output
+
+# set output path
+python remaker.py output "Path/to/output/dir"
+
+# reset output path
+python remaker.py output --reset
 ```
 
 #### Help
