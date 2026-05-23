@@ -1,2 +1,2 @@
 @echo off
-python "%~dp0remaker.py" %*
+"%~dp0venv\Scripts\python.exe" "%~dp0remaker.py" %*

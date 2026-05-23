@@ -7,6 +7,8 @@ HTML resume generator based on Jinja2 templates. Quickly make tailored resumes f
 ```
 remaker/
 ├── remaker.py        # entry point
+├── remaker           # Linux/macOS wrapper script
+├── remaker.bat       # Windows wrapper script
 ├── modules/
 ├── template.html     # Jinja2 resume template
 ├── style.css         # styles
@@ -27,7 +29,7 @@ git clone https://github.com/Sm4rtSt1ck/resume-maker
 cd resume-maker
 ```
 
-# Install the dependencies
+2. Create a virtual environment and install dependencies
 ```bash
 python -m venv venv
 ```
@@ -43,6 +45,33 @@ venv\Scripts\activate.bat
 ```bash
 pip install -r requirements.txt
 ```
+
+### Setting up the CLI
+
+#### Linux / macOS
+
+Make the wrapper script executable and create a symlink:
+
+```bash
+chmod +x remaker
+sudo ln -sf "$(pwd)/remaker" /usr/local/bin/remaker
+```
+
+#### Windows
+
+Add the project directory to your `PATH` so that `remaker.bat` is available system-wide:
+
+1. Open **System Properties → Advanced → Environment Variables**
+2. Under **User variables**, select `Path` and click **Edit**
+3. Click **New** and paste the full path to the project directory (e.g. `C:\Projects\resume-maker`)
+4. Click **OK** and restart any open terminals
+
+Now you can run the tool from anywhere:
+
+```bash
+remaker make "Python Developer"
+```
+
 
 ## Resume Data
 
@@ -107,13 +136,13 @@ You can use commands for configuration.
 #### Make a resume
 
 ```bash
-python remaker.py make "Python Developer"
+remaker make "Python Developer"
 ```
 
 With a custom data file:
 
 ```bash
-python remaker.py make "Python Developer" -dp your_data_file_name
+remaker make "Python Developer" -dp your_data_file_name
 ```
 
 Data is stored in `data/FILE_NAME.json`.
@@ -122,30 +151,30 @@ Data is stored in `data/FILE_NAME.json`.
 
 ```bash
 # show current language
-python remaker.py lang
+remaker lang
 
 # set language
-python remaker.py lang en
+remaker lang en
 ```
 
 #### Change output path
 
 ```bash
 # show current output path
-python remaker.py output
+remaker output
 
 # set output path
-python remaker.py output "Path/to/output/dir"
+remaker output "Path/to/output/dir"
 
 # reset output path
-python remaker.py output --reset
+remaker output --reset
 ```
 
 #### Help
 
 ```bash
-python main.py --help
-python main.py make --help
+remaker --help
+remaker make --help
 ```
 
 ## Dependencies
