@@ -6,14 +6,17 @@ HTML resume generator based on Jinja2 templates. Quickly make tailored resumes f
 
 ```
 remaker/
-├── main.py           # entry point
+├── remaker.py        # entry point
+├── modules/
 ├── template.html     # Jinja2 resume template
 ├── style.css         # styles
 ├── locales.json      # translations (ru/en)
 ├── config.json       # settings
-├── data.json         # default resume data
 ├── requirements.txt
-└── output/           # generated resumes
+├── output/           # generated resumes
+└── data/
+    ├── data.json     # default resume data
+    └── photo.png     # default photo
 ```
 
 ## Installation
@@ -85,7 +88,7 @@ The phone number may not be specified; for this, the quotes must be blank
 {
     "output_path": "output/",
     "style_path": "style.css",
-    "data_path": "data/data.json",
+    "data_file": "data.json",
     "lang": "en"
 }
 ```
@@ -95,10 +98,8 @@ You can use commands for configuration.
 | Command | Field | Description |
 |---|---|---|
 | output | `output_path` | folder for generated resumes |
-| data | `data_path` | path to resume data |
+| data | `data_file` | path to resume data |
 | lang | `lang` | resume language (`ru` / `en`) |
-
-
 
 
 ## Usage

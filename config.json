@@ -1,6 +1,4 @@
 {
     "style_path": "style.css",
-    "lang": "en",
-    "data_path": "data",
-    "output_path": "output/"
+    "data_file": "data"
 }

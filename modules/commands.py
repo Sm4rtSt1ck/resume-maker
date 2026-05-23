@@ -20,7 +20,7 @@ def generate_html(data: dict, config: dict) -> str:
     with open(BASE_DIR / "locales.json", encoding="utf-8") as f:
         locales = json.load(f)
 
-    lang = config.get("lang", "en")
+    lang = data.get("lang", "en")
     t = locales.get(lang, locales["en"])
 
     css_path = BASE_DIR / config.get("style_path", "style.css")
@@ -59,11 +59,11 @@ def generate_html(data: dict, config: dict) -> str:
 
 
 def command_make(args: argparse.Namespace, config: dict):
-    if not Path(BASE_DIR / ("data/" + args.data_path + ".json")).exists():
-        print(f"Error: file '{args.data_path}' not found")
+    if not Path(BASE_DIR / ("data/" + args.data_file + ".json")).exists():
+        print(f"Error: file '{args.data_file}' not found")
         sys.exit(1)
 
-    with open(BASE_DIR / ("data/" + args.data_path + ".json"),
+    with open(BASE_DIR / ("data/" + args.data_file + ".json"),
               encoding="utf-8") as f:
         data = json.load(f)
 
@@ -88,27 +88,18 @@ def command_make(args: argparse.Namespace, config: dict):
                 webbrowser.open(file_url)
 
 
-def command_lang(args: argparse.Namespace, config: dict):
-    if args.language is None:
-        print(f"Current language: {config.get("lang", "en")}")
-
-    else:
-        write_config(config, "lang", args.language)
-        print(f"Language set to: {args.language}")
-
-
 def command_data(args: argparse.Namespace, config: dict):
-    if args.data_path is None and not args.reset:
+    if args.data_file is None and not args.reset:
         print(f"Current name of resume data file: {
-            config.get("data_path", "data")}")
+            config.get("data_file", "data")}")
 
-    elif args.data_path is not None:
-        write_config(config, "data_path", args.data_path)
-        print(f"Name of data file set to: {args.data_path}")
+    elif args.data_file is not None:
+        write_config(config, "data_file", args.data_file)
+        print(f"Name of data file set to: {args.data_file}")
 
     elif args.reset:
         try:
-            remove_from_config(config, "data_path")
+            remove_from_config(config, "data_file")
             print(f"Name of data file is reset to default: data")
         except KeyError:
             print(f"Name of data file is already default: data")

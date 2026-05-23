@@ -1,4 +1,4 @@
-data/mydata.json
+data/mydata*.json
 data/myphoto.*
 output/
 

@@ -22,20 +22,14 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
         "make", help="Make resume from data file")
     make_parser.add_argument("position", help="Job position name")
     make_parser.add_argument(
-        "-dp", "--data_path",
-        default=config.get("data_path", "data"),
+        "-d", "--data_file",
+        default=config.get("data_file", "data"),
         help=f"Path to data file"
     )
 
-    # Language
-    lang_parser = subparsers.add_parser("lang",
-                                        help="Change resume language (en/ru)")
-    lang_parser.add_argument("language", nargs="?",
-                             help="Resume language (en/ru)", default=None)
-
     # Data
     data_parser = subparsers.add_parser("data", help=f"Set name of data file")
-    data_parser.add_argument("data_path", nargs="?",
+    data_parser.add_argument("data_file", nargs="?",
                              help="Name of data file", default=None)
     data_parser.add_argument("-r", "--reset", action="store_true",
                              help="Reset to default")
@@ -64,8 +58,6 @@ def main():
 
     if args.command == "make":
         command_make(args, config)
-    elif args.command == "lang":
-        command_lang(args, config)
     elif args.command == "data":
         command_data(args, config)
     elif args.command == "output":
