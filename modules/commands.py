@@ -23,13 +23,6 @@ def generate_html(data: dict, config: dict) -> str:
     lang = data.get("lang", "en")
     t = locales.get(lang, locales["en"])
 
-    css_path = BASE_DIR / config.get("style_path", "style.css")
-    if not css_path.exists():
-        print(f"Warning: style file '{css_path}' not found")
-        css = ""
-    else:
-        css = css_path.read_text(encoding="utf-8")
-
     photo_data_uri = None
     photo_path = BASE_DIR / ("data/" + data.get("photo", "photo.png"))
     if photo_path and Path(photo_path).exists():
@@ -38,10 +31,17 @@ def generate_html(data: dict, config: dict) -> str:
             encoded = base64.b64encode(f.read()).decode("utf-8")
         photo_data_uri = f"data:{mime};base64,{encoded}"
 
-    env = Environment(loader=FileSystemLoader(BASE_DIR))
-    html = env.get_template("template.html").render(
+    template_name = config.get("template", "classic")
+    templates_dir = BASE_DIR / "templates"
+
+    template_file = templates_dir / f"{template_name}.html"
+    if not template_file.exists():
+        print(f"Error: template '{template_name}' not found in {templates_dir}")
+        sys.exit(1)
+
+    env = Environment(loader=FileSystemLoader(templates_dir))
+    html = env.get_template(f"{template_name}.html").render(
         **data,
-        css=css,
         photo_data_uri=photo_data_uri,
         t=t
     )
@@ -122,3 +122,32 @@ def command_output(args: argparse.Namespace, config: dict):
         except KeyError:
             print(f"Output path is already default: {
                 clickable_path(BASE_DIR / "output/")}")
+
+
+def command_template(args: argparse.Namespace, config: dict):
+    templates_dir = BASE_DIR / "templates"
+
+    if args.template_name is None and not args.reset:
+        current = config.get("template", "classic")
+        available = sorted(
+            p.stem for p in templates_dir.glob("*.html")
+        )
+        print(f"Current template: {current}")
+        print(f"Available templates: {', '.join(available)}")
+
+    elif args.template_name is not None:
+        template_file = templates_dir / f"{args.template_name}.html"
+        if not template_file.exists():
+            available = sorted(p.stem for p in templates_dir.glob("*.html"))
+            print(f"Error: template '{args.template_name}' not found.")
+            print(f"Available templates: {', '.join(available)}")
+            sys.exit(1)
+        write_config(config, "template", args.template_name)
+        print(f"Template set to: {args.template_name}")
+
+    elif args.reset:
+        try:
+            remove_from_config(config, "template")
+            print("Template is reset to default: classic")
+        except KeyError:
+            print("Template is already default: classic")

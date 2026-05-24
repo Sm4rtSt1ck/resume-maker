@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="{{ lang | default('en') }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ name }} — {{ position }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+/* ── Nord palette ─────────────────────────── */
+:root {
+  --nord0:  #1D212C;   /* bg (darker than canonical) */
+  --nord1:  #2E3440;   /* raised surface             */
+  --nord2:  #3B4252;   /* selection / dividers       */
+  --nord3:  #434C5E;   /* inactive / muted           */
+  --nord4:  #4C566A;   /* comments                   */
+  --nord5:  #D8DEE9;   /* primary text               */
+  --nord6:  #E5E9F0;   /* bright text                */
+  --nord7:  #ECEFF4;   /* brightest                  */
+  --nord8:  #88C0D0;   /* frost cyan                 */
+  --nord9:  #81A1C1;   /* frost blue                 */
+  --nord10: #5E81AC;   /* frost dark blue            */
+  --nord11: #BF616A;   /* aurora red                 */
+  --nord12: #D08770;   /* aurora orange              */
+  --nord13: #EBCB8B;   /* aurora yellow              */
+  --nord14: #A3BE8C;   /* aurora green               */
+  --nord15: #B48EAD;   /* aurora purple              */
+  --font:   'JetBrains Mono', ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--nord0);
+  color: var(--nord5);
+  font-family: var(--font);
+  font-size: 10.5px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Page card ─────────────────────────────── */
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 100vh;
+}
+
+/* ── Prompt bar ─────────────────────────────── */
+.prompt {
+  font-size: 10.5px;
+  margin-bottom: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.prompt-user  { color: var(--nord14); }
+.prompt-sep   { color: var(--nord5);  }
+.prompt-path  { color: var(--nord9);  }
+.prompt-dollar{ color: var(--nord5);  }
+.prompt-cmd   { color: var(--nord8);  }
+.prompt-cursor{ color: var(--nord5); animation: blink 1.1s step-end infinite; }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── Header grid (name + photo) ─────────────── */
+.header {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 16px;
+  margin-bottom: 18px;
+  align-items: start;
+}
+
+/* Name side */
+.header-left {}
+
+.name-line {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--nord14);
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+.name-hash { color: var(--nord4); }
+
+.tags-line {
+  font-size: 10px;
+  color: var(--nord11);
+  margin-bottom: 2px;
+}
+.tags-bracket { color: var(--nord4); }
+.tags-sep     { color: var(--nord4); }
+
+.header-divider {
+  color: var(--nord3);
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  margin-bottom: 10px;
+  user-select: none;
+}
+
+/* Contacts grid */
+.contacts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 18px;
+}
+
+.contact-row {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.contact-key   { color: var(--nord9);  flex-shrink: 0; }
+.contact-eq    { color: var(--nord4);  flex-shrink: 0; }
+.contact-quote { color: var(--nord13); flex-shrink: 0; }
+.contact-val   { color: var(--nord5);  overflow: hidden; text-overflow: ellipsis; }
+.contact-val a { color: var(--nord5); text-decoration: none; }
+.contact-val a:hover { color: var(--nord8); }
+
+/* Photo side */
+.header-right {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Рамка: CSS-бордер как основа, ASCII-углы как декор поверх */
+.photo-frame {
+  position: relative;
+  width: 100%;
+}
+
+/* Фото-бокс с реальным бордером */
+.photo-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--nord2);
+  border: 1px solid var(--nord9);
+}
+
+/* Подпись под рамкой */
+.photo-caption {
+  font-size: 8.5px;
+  color: var(--nord4);
+  margin-top: 4px;
+}
+.photo-ok { color: var(--nord14); }
+
+/* ASCII-углы: 4 абсолютно позиционированных символа */
+/* background перекрывает угол бордера, создавая вид ASCII-рамки */
+.pc {
+  position: absolute;
+  color: var(--nord9);
+  font-size: 12px;
+  line-height: 1;
+  z-index: 5;
+  background: var(--nord0);
+  user-select: none;
+}
+.pc-tl { top:  -7px; left:  -1px; }
+.pc-tr { top:  -7px; right: -1px; }
+.pc-bl { bottom: -7px; left:  -1px; }
+.pc-br { bottom: -7px; right: -1px; }
+
+.photo-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Slight phosphor tint */
+  filter: saturate(0.75) brightness(0.88) hue-rotate(5deg);
+}
+
+/* CRT scanlines overlay */
+.photo-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent          0px,
+      transparent          3px,
+      rgba(0, 0, 0, 0.20)  3px,
+      rgba(0, 0, 0, 0.20)  4px
+    );
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* CRT cyan phosphor glow */
+.photo-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(136, 192, 208, 0.08);
+  mix-blend-mode: screen;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Photo placeholder */
+.photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nord4);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  background: var(--nord2);
+  position: relative;
+}
+
+/* ── Section ─────────────────────────────────── */
+.section { margin-bottom: 10px; }
+
+/* отступ перед каждым заголовком кроме первого */
+.section + .section,
+.section ~ .section {
+  margin-top: 18px;
+}
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.section-mark  { font-weight: 700; color: var(--nord11); flex-shrink: 0; }
+.section-title { font-weight: 700; color: var(--nord11); flex-shrink: 0; }
+.section-rule  {
+  color: var(--nord3);
+  flex: 1;
+  min-width: 0;       /* ключевое: flex-item может сжаться ниже content-size */
+  overflow: hidden;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* About */
+.about-text {
+  font-size: 10.5px;
+  color: var(--nord5);
+  line-height: 1.6;
+  padding-left: 0;
+}
+
+/* Entries (experience / education) — two-column table layout */
+.entry {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  column-gap: 16px;
+  margin-bottom: 12px;
+}
+.entry:last-child { margin-bottom: 0; }
+
+.entry-period {
+  color: var(--nord9);
+  font-size: 10px;
+  padding-top: 1px;
+  line-height: 1.45;
+  /* выравниваем по верху правого блока */
+  align-self: start;
+}
+
+.entry-right {}
+
+.entry-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 3px;
+}
+
+.entry-company { color: var(--nord5);  font-weight: 700; }
+.entry-dash    { color: var(--nord4);  flex-shrink: 0; }
+.entry-role    { color: var(--nord8);  }
+.entry-desc    {
+  font-size: 10px;
+  color: var(--nord5);
+  line-height: 1.55;
+}
+
+/* Skills + Hobbies + Status row */
+.bottom-row {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  margin-top: 18px;
+  margin-bottom: 14px;
+}
+
+.bottom-row .section {
+  flex: 1;
+  margin-top: 0;      /* сбрасываем глобальный margin-top внутри bottom-row */
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+/* Skills */
+.skill-list { display: flex; flex-direction: column; gap: 3px; }
+
+.skill-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.skill-name  { color: var(--nord6);  min-width: 70px; }
+.skill-bar   { color: var(--nord8); letter-spacing: 1px; }
+.skill-label { color: var(--nord4); font-size: 9.5px; }
+
+/* Hobbies */
+.hobby-list { display: flex; flex-direction: column; gap: 2px; }
+
+.hobby-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.hobby-num  { color: var(--nord4); }
+.hobby-arr  { color: var(--nord9); }
+.hobby-name { color: var(--nord5); }
+
+/* Status */
+.status-list { display: flex; flex-direction: column; gap: 2px; }
+
+.status-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.status-bullet  { color: var(--nord14); }
+.status-arrow   { color: var(--nord9);  }
+.status-text    { color: var(--nord5);  }
+.status-sub     { color: var(--nord9);  }
+
+/* ── Bottom prompt ─────────────────────────── */
+.prompt-bottom {
+  margin-top: auto;
+  padding-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.print-btn {
+  font-family: var(--font);
+  font-size: 9.5px;
+  color: var(--nord4);
+  background: none;
+  border: 1px solid var(--nord3);
+  padding: 3px 10px;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  transition: all 0.15s;
+}
+.print-btn:hover {
+  background: var(--nord2);
+  color: var(--nord8);
+  border-color: var(--nord9);
+}
+
+@media print {
+  .prompt-cursor  { animation: none; opacity: 1; }
+  .print-btn      { display: none; }
+  .page           { min-height: unset; }
+}
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ── Top prompt ── -->
+  <div class="prompt">
+    <span class="prompt-user">hire@me</span><span class="prompt-sep"> : </span><span class="prompt-path">~/cv</span><span class="prompt-sep"> </span><span class="prompt-dollar">$ </span><span class="prompt-cmd">cat resume.md &amp;&amp; display photo.jpg</span><span class="prompt-cursor"> ▌</span>
+  </div>
+
+  <!-- ── Header ── -->
+  <div class="header">
+
+    <div class="header-left">
+      <div class="name-line">
+        <span class="name-hash"># </span>{{ name | upper }}
+      </div>
+
+      <!-- Position tags -->
+      <div class="tags-line">
+        <span class="tags-bracket">[</span>
+        {% set parts = position.lower().split() %}
+        {% for part in parts %}
+          <span>{{ part }}</span>{% if not loop.last %}<span class="tags-sep"> · </span>{% endif %}
+        {% endfor %}
+        <span class="tags-bracket"> ]</span>
+        <span class="header-divider"> ────────────────────────────</span>
+      </div>
+
+      <!-- Contacts grid -->
+      <div class="contacts">
+        {% if city %}
+        <div class="contact-row">
+          <span class="contact-key">city</span>
+          <span class="contact-eq">=</span>
+          <span class="contact-val">
+            <span class="contact-quote">"</span>{{ city }}<span class="contact-quote">"</span>
+          </span>
+        </div>
+        {% endif %}
+
+        {% if work_formats %}
+        <div class="contact-row">
+          <span class="contact-key">format</span>
+          <span class="contact-eq">=</span>
+          <span class="contact-val">
+            <span class="contact-quote">"</span>{{ work_formats | map('lower') | join(', ') }}<span class="contact-quote">"</span>
+          </span>
+        </div>
+        {% endif %}
+
+        {% if email %}
+        <div class="contact-row">
+          <span class="contact-key">email</span>
+          <span class="contact-eq">=</span>
+          <span class="contact-val">
+            <span class="contact-quote">"</span><a href="mailto:{{ email }}">{{ email }}</a><span class="contact-quote">"</span>
+          </span>
+        </div>
+        {% endif %}
+
+        {% if telegram %}
+        <div class="contact-row">
+          <span class="contact-key">telegram</span>
+          <span class="contact-eq">=</span>
+          <span class="contact-val">
+            <span class="contact-quote">"</span><a href="https://t.me/{{ telegram }}" target="_blank">@{{ telegram }}</a><span class="contact-quote">"</span>
+          </span>
+        </div>
+        {% endif %}
+
+        {% if github %}
+        <div class="contact-row">
+          <span class="contact-key">github</span>
+          <span class="contact-eq">=</span>
+          <span class="contact-val">
+            <span class="contact-quote">"</span><a href="{{ github }}" target="_blank">{{ github.replace("https://", "").replace("http://", "") }}</a><span class="contact-quote">"</span>
+          </span>
+        </div>
+        {% endif %}
+
+        {% if phone %}
+        <div class="contact-row">
+          <span class="contact-key">phone</span>
+          <span class="contact-eq">=</span>
+          <span class="contact-val">
+            <span class="contact-quote">"</span><a href="tel:{{ phone }}">{{ phone }}</a><span class="contact-quote">"</span>
+          </span>
+        </div>
+        {% endif %}
+
+        {% if birth_date %}
+        <div class="contact-row">
+          <span class="contact-key">born</span>
+          <span class="contact-eq">=</span>
+          <span class="contact-val">
+            <span class="contact-quote">"</span>{{ birth_date }}<span class="contact-quote">"</span>
+          </span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Photo side -->
+    <div class="header-right">
+      <div class="photo-frame">
+        <!-- ASCII углы поверх CSS-бордера -->
+        <span class="pc pc-tl">┌</span>
+        <span class="pc pc-tr">┐</span>
+        <span class="pc pc-bl">└</span>
+        <span class="pc pc-br">┘</span>
+
+        <!-- Фото внутри настоящего CSS-бордера -->
+        <div class="photo-box">
+          {% if photo_data_uri %}
+            <img src="{{ photo_data_uri }}" alt="{{ name }}" />
+          {% else %}
+            <div class="photo-placeholder">[ фото ]</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="photo-caption">
+        ./portrait.jpg · <span class="photo-ok">OK</span>
+      </div>
+    </div>
+
+  </div><!-- /header -->
+
+  <!-- ── ABOUT ── -->
+  {% if about %}
+  <div class="section">
+    <div class="section-header">
+      <span class="section-mark">##</span>
+      <span class="section-title">{{ t.about | upper }}</span>
+      <span class="section-rule">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+    </div>
+    <p class="about-text">{{ about }}</p>
+  </div>
+  {% endif %}
+
+  <!-- ── EXPERIENCE ── -->
+  {% if work_experience %}
+  <div class="section">
+    <div class="section-header">
+      <span class="section-mark">##</span>
+      <span class="section-title">{{ t.experience | upper }}</span>
+      <span class="section-rule">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+    </div>
+    {% for job in work_experience %}
+    <div class="entry">
+      <div class="entry-period">{{ job[0] }}</div>
+      <div class="entry-right">
+        <div class="entry-title-row">
+          <span class="entry-company">{{ job[1] }}</span>
+          <span class="entry-dash">—</span>
+          <span class="entry-role">{{ job[2] }}</span>
+        </div>
+        {% if job[3] %}
+        <div class="entry-desc">{{ job[3] }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ── EDUCATION ── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-mark">##</span>
+      <span class="section-title">{{ t.education | upper }}</span>
+      <span class="section-rule">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+    </div>
+    {% for edu in education %}
+    <div class="entry">
+      <div class="entry-period">{{ edu[0] }}</div>
+      <div class="entry-right">
+        <div class="entry-title-row">
+          <span class="entry-company">{{ edu[1] }}</span>
+          <span class="entry-dash">—</span>
+          <span class="entry-role">{{ edu[2] }}</span>
+        </div>
+        {% if edu[3] %}
+        <div class="entry-desc">{{ edu[3] }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ── SKILLS + HOBBIES + STATUS (одна строка) ── -->
+  <div class="bottom-row">
+
+    {% if skills %}
+    <div class="section">
+      <div class="section-header">
+        <span class="section-mark">##</span>
+        <span class="section-title">{{ t.skills | upper }}</span>
+        <span class="section-rule">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+      </div>
+      <div class="skill-list">
+        {% for skill, level in skills.items() %}
+        <div class="skill-row">
+          <span class="skill-name">{{ skill }}</span>
+          <span class="skill-bar">{% if level == 'high' %}███{% elif level == 'mid' %}██░{% else %}█░░{% endif %}</span>
+          <span class="skill-label">
+            {%- if level == 'high' -%}
+              {%- if lang == 'ru' %}продвинутый{% else %}advanced{% endif -%}
+            {%- elif level == 'mid' -%}
+              {%- if lang == 'ru' %}уверенный{% else %}proficient{% endif -%}
+            {%- else -%}
+              {%- if lang == 'ru' %}базовый{% else %}basic{% endif -%}
+            {%- endif -%}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if hobbies %}
+    <div class="section">
+      <div class="section-header">
+        <span class="section-mark">##</span>
+        <span class="section-title">{{ t.hobbies | upper }}</span>
+        <span class="section-rule">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+      </div>
+      <div class="hobby-list">
+        {% for hobby in hobbies %}
+        <div class="hobby-row">
+          <span class="hobby-num">{{ "%02d" % loop.index }}</span>
+          <span class="hobby-arr">▸</span>
+          <span class="hobby-name">{{ hobby }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if work_formats or position %}
+    <div class="section">
+      <div class="section-header">
+        <span class="section-mark">##</span>
+        <span class="section-title">STATUS</span>
+        <span class="section-rule">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+      </div>
+      <div class="status-list">
+        <div class="status-row">
+          <span class="status-bullet">●</span>
+          <span class="status-text">{{ t.suggestions }}</span>
+        </div>
+        {% for fmt in work_formats %}
+        <div class="status-row">
+          <span class="status-bullet">●</span>
+          <span class="status-text">{{ t[fmt] if t[fmt] is defined else fmt }}-first</span>
+        </div>
+        {% endfor %}
+        {% for word in position.lower().split() %}
+        <div class="status-row">
+          <span class="status-arrow">↳</span>
+          <span class="status-sub">{{ word }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div><!-- /bottom-row -->
+
+  <!-- ── Bottom prompt ── -->
+  <div class="prompt-bottom">
+    <div class="prompt">
+      <span class="prompt-user">hire@me</span><span class="prompt-sep"> : </span><span class="prompt-path">~/cv</span><span class="prompt-sep"> </span><span class="prompt-dollar">$ </span><span class="prompt-cursor">▌</span>
+    </div>
+    <button class="print-btn" onclick="window.print()">⌘P {{ 'Печать' if lang == 'ru' else 'Print' }}</button>
+  </div>
+
+</div><!-- /page -->
+
+</body>
+</html>

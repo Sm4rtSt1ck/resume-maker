@@ -18,17 +18,18 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
 
     subparsers = parser.add_subparsers(dest="command")
 
+    # Make
     make_parser = subparsers.add_parser(
         "make", help="Make resume from data file")
     make_parser.add_argument("position", help="Job position name")
     make_parser.add_argument(
         "-d", "--data_file",
         default=config.get("data_file", "data"),
-        help=f"Path to data file"
+        help="Path to data file"
     )
 
     # Data
-    data_parser = subparsers.add_parser("data", help=f"Set name of data file")
+    data_parser = subparsers.add_parser("data", help="Set name of data file")
     data_parser.add_argument("data_file", nargs="?",
                              help="Name of data file", default=None)
     data_parser.add_argument("-r", "--reset", action="store_true",
@@ -41,6 +42,17 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
                                help="Path to output file", default=None)
     output_parser.add_argument("-r", "--reset", action="store_true",
                                help="Reset to default")
+
+    # Template
+    template_parser = subparsers.add_parser(
+        "template", help="Set or show the active HTML template")
+    template_parser.add_argument(
+        "template_name", nargs="?",
+        help="Template name without .html extension (e.g. classic, swiss)",
+        default=None
+    )
+    template_parser.add_argument("-r", "--reset", action="store_true",
+                                 help="Reset to default (classic)")
 
     return parser
 
@@ -62,6 +74,8 @@ def main():
         command_data(args, config)
     elif args.command == "output":
         command_output(args, config)
+    elif args.command == "template":
+        command_template(args, config)
 
 
 if __name__ == "__main__":

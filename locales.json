@@ -8,7 +8,8 @@
         "hybrid": "Гибрид",
         "remote": "Удалённый",
         "hobbies": "Увлечения",
-        "about": "О себе"
+        "about": "О себе",
+        "suggestions": "Открыт к предложениям"
     },
     "en": {
         "experience": "Work Experience",
@@ -19,6 +20,7 @@
         "hybrid": "Hybrid",
         "remote": "Remote",
         "hobbies": "Hobbies",
-        "about": "About me"
+        "about": "About me",
+        "suggestions": "Open to work"
     }
 }

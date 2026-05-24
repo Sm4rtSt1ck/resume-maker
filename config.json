@@ -1,4 +1,4 @@
 {
-    "style_path": "style.css",
-    "data_file": "data"
+    "data_file": "data",
+    "template": "nord"
 }

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="{{ lang | default('en') }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ name }} — {{ position }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:        #f9f5ee;
+  --card-bg:   #ffffff;
+  --ink:       #1c1917;
+  --muted:     #78716c;
+  --border:    #d6cfc0;
+  --accent:    #1c1917;
+  --tag-bg:    #ede8df;
+  --skill-high: #bbf7d0;
+  --skill-mid:  #fef08a;
+  --skill-low:  #fecaca;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-mono:  'JetBrains Mono', monospace;
+  --font-sans:  'Inter', system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Page shell ─────────────────────────── */
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  min-height: 100vh;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+/* ── Header ─────────────────────────────── */
+
+.header {
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  align-items: end;
+  gap: 0;
+  padding: 40px 48px 0;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 24px;
+}
+
+.header-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.8;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-right: 1px solid var(--border);
+  padding-right: 24px;
+  padding-bottom: 4px;
+}
+
+.header-meta strong {
+  color: var(--ink);
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  margin-bottom: 6px;
+}
+
+.header-name {
+  font-family: var(--font-serif);
+  font-size: 64px;
+  line-height: 0.92;
+  letter-spacing: -2px;
+  padding-left: 32px;
+  padding-bottom: 4px;
+  font-style: italic;
+}
+
+.header-photo {
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  align-self: end;
+}
+
+.header-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.header-photo-placeholder {
+  width: 100px;
+  height: 100px;
+  background: var(--tag-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 2px solid var(--border);
+}
+
+/* ── Info bar ────────────────────────────── */
+
+.infobar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 48px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.infobar-label {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  margin-right: 4px;
+}
+
+.infobar-contacts {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.infobar-sep {
+  color: var(--border);
+  margin: 0 10px;
+  user-select: none;
+}
+
+.infobar-contacts a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.infobar-contacts a:hover {
+  color: var(--ink);
+}
+
+.infobar-page {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── Body grid ───────────────────────────── */
+
+.body {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  align-items: start;
+}
+
+/* ── Main content ────────────────────────── */
+
+.main {
+  padding: 0 48px 48px 48px;
+  border-right: 1px solid var(--border);
+}
+
+/* ── Section ─────────────────────────────── */
+
+.section {
+  border-top: 1px solid var(--border);
+  padding-top: 28px;
+  padding-bottom: 32px;
+}
+
+.section:first-child {
+  border-top: none;
+  padding-top: 32px;
+}
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.section-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1;
+}
+
+/* About */
+
+.about-text {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #3a3530;
+  font-weight: 300;
+}
+
+/* Entries */
+
+.entry {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 0 20px;
+  margin-bottom: 22px;
+}
+
+.entry:last-child {
+  margin-bottom: 0;
+}
+
+.entry-left {
+  padding-top: 2px;
+}
+
+.entry-period {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.entry-company {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.entry-company::before {
+  content: "→ ";
+}
+
+.entry-right {}
+
+.entry-role {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.entry-desc {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--muted);
+  font-weight: 300;
+}
+
+/* ── Sidebar ─────────────────────────────── */
+
+.aside {
+  padding: 32px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.aside-section {
+  margin-bottom: 28px;
+}
+
+.aside-section:last-child {
+  margin-bottom: 0;
+}
+
+.aside-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Skills */
+
+.skill-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skill-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.skill-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.skill-dot {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.skill-level {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 5px;
+  border-radius: 2px;
+  font-weight: 500;
+}
+
+.skill-level--high { background: var(--skill-high); color: #14532d; }
+.skill-level--mid  { background: var(--skill-mid);  color: #713f12; }
+.skill-level--low  { background: var(--skill-low);  color: #7f1d1d; }
+
+/* Hobbies */
+
+.hobby-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.hobby-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.hobby-num {
+  font-size: 8.5px;
+  color: var(--border);
+  flex-shrink: 0;
+}
+
+/* Work format */
+
+.format-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.format-tag {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Footer ──────────────────────────────── */
+
+.footer {
+  border-top: 2px solid var(--ink);
+  padding: 14px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.footer-name {
+  color: var(--ink);
+}
+
+.footer-print {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 2px;
+  transition: all 0.15s;
+}
+
+.footer-print:hover {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+@media print {
+  body { background: white; }
+  .page {
+    border: none;
+    max-width: 100%;
+  }
+  .footer-print { display: none; }
+}
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="header-meta">
+      <strong>Résumé</strong>
+      {{ position | upper }}
+    </div>
+
+    <h1 class="header-name">
+      {% for word in name.split() %}{{ word }}<br>{% endfor %}
+    </h1>
+
+    {% if photo_data_uri %}
+      <div class="header-photo">
+        <img src="{{ photo_data_uri }}" alt="{{ name }}" />
+      </div>
+    {% else %}
+      <div class="header-photo-placeholder">foto</div>
+    {% endif %}
+  </header>
+
+  <!-- ── Info bar ── -->
+  <div class="infobar">
+    <div class="infobar-contacts">
+      {% if city %}
+        <span class="infobar-label">{{ t.location if t.location is defined else "Location" }}</span>
+        <span>{{ city }}</span>
+      {% endif %}
+
+      {% if work_formats %}
+        {% for item in work_formats %}
+          <span class="infobar-sep">/</span>
+          <span>{{ t[item] if t[item] is defined else item }}</span>
+        {% endfor %}
+      {% endif %}
+
+      {% if email %}
+        <span class="infobar-sep">/</span>
+        <a href="mailto:{{ email }}">{{ email }}</a>
+      {% endif %}
+
+      {% if phone %}
+        <span class="infobar-sep">/</span>
+        <a href="tel:{{ phone }}">{{ phone }}</a>
+      {% endif %}
+
+      {% if telegram %}
+        <span class="infobar-sep">/</span>
+        <a href="https://t.me/{{ telegram }}" target="_blank">@{{ telegram }}</a>
+      {% endif %}
+
+      {% if github %}
+        <span class="infobar-sep">/</span>
+        <a href="{{ github }}" target="_blank">
+          {{ github.replace("https://", "").replace("http://", "") }}
+        </a>
+      {% endif %}
+    </div>
+
+    <span class="infobar-page">P. 1 / 1</span>
+  </div>
+
+  <!-- ── Body ── -->
+  <div class="body">
+
+    <main class="main">
+
+      <!-- 01 About -->
+      {% if about %}
+      <section class="section">
+        <div class="section-header">
+          <span class="section-num">01</span>
+          <span class="section-title">{{ t.about }}</span>
+        </div>
+        <p class="about-text">{{ about }}</p>
+      </section>
+      {% endif %}
+
+      <!-- 02 Experience -->
+      {% if work_experience %}
+      <section class="section">
+        <div class="section-header">
+          <span class="section-num">0{{ 2 if about else 1 }}</span>
+          <span class="section-title">{{ t.experience }}</span>
+        </div>
+        {% for job in work_experience %}
+        <div class="entry">
+          <div class="entry-left">
+            <div class="entry-period">{{ job[0] }}</div>
+            <div class="entry-company">{{ job[1] }}</div>
+          </div>
+          <div class="entry-right">
+            <div class="entry-role">{{ job[2] }}</div>
+            {% if job[3] %}
+            <div class="entry-desc">{{ job[3] }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </section>
+      {% endif %}
+
+      <!-- 03 Education -->
+      <section class="section">
+        {% set sec_num = namespace(n=1) %}
+        {% if about %}{% set sec_num.n = sec_num.n + 1 %}{% endif %}
+        {% if work_experience %}{% set sec_num.n = sec_num.n + 1 %}{% endif %}
+        <div class="section-header">
+          <span class="section-num">0{{ sec_num.n }}</span>
+          <span class="section-title">{{ t.education }}</span>
+        </div>
+        {% for edu in education %}
+        <div class="entry">
+          <div class="entry-left">
+            <div class="entry-period">{{ edu[0] }}</div>
+            <div class="entry-company">{{ edu[1] }}</div>
+          </div>
+          <div class="entry-right">
+            <div class="entry-role">{{ edu[2] }}</div>
+            {% if edu[3] %}
+            <div class="entry-desc">{{ edu[3] }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </section>
+
+    </main>
+
+    <!-- ── Aside ── -->
+    <aside class="aside">
+
+      <div class="aside-section">
+        <h2 class="aside-label">{{ t.skills }}</h2>
+        <ul class="skill-list">
+          {% for skill, level in skills.items() %}
+          <li class="skill-item">
+            <span class="skill-name">{{ skill }}</span>
+            <span class="skill-dot"></span>
+            <span class="skill-level skill-level--{{ level }}">{{ level }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      {% if hobbies %}
+      <div class="aside-section">
+        <h2 class="aside-label">{{ t.hobbies }}</h2>
+        <ul class="hobby-list">
+          {% for hobby in hobbies %}
+          <li class="hobby-item">
+            <span class="hobby-num">{{ "%02d" % loop.index }}</span>
+            <span>{{ hobby }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if work_formats %}
+      <div class="aside-section">
+        <h2 class="aside-label">{{ t.work_format if t.work_format is defined else "Format" }}</h2>
+        <div class="format-list">
+          {% for item in work_formats %}
+          <span class="format-tag">{{ t[item] if t[item] is defined else item }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </aside>
+
+  </div>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <span class="footer-text">End · <span class="footer-name">{{ name }}</span></span>
+    <button class="footer-print" onclick="window.print()">⌘P Print</button>
+  </footer>
+
+</div>
+
+</body>
+</html>
