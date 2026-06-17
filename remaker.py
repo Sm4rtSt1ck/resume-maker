@@ -34,6 +34,8 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
                              help="Name of data file", default=None)
     data_parser.add_argument("-r", "--reset", action="store_true",
                              help="Reset to default")
+    data_parser.add_argument("-l", "--list", action="store_true",
+                             help="List all data files")
 
     # Output
     output_parser = subparsers.add_parser("output",
@@ -62,6 +64,12 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     search_parser = subparsers.add_parser(
         "search", help="Get created resume files for a position")
     search_parser.add_argument("position", help="Job position name")
+    
+    # Show
+    show_parser = subparsers.add_parser(
+        "show", help="Show data in data file")
+    show_parser.add_argument("data_file", nargs="?", default=None,
+                             help="Name of data file to show")
     
     # Browser
     browser_parser = subparsers.add_parser(
@@ -110,6 +118,8 @@ def main():
         command_last(config)
     elif args.command == "search":
         command_search(args, config)
+    elif args.command == "show":
+        command_show(args, config)
     elif args.command == "browser":
         command_browser(args, config)
     # elif args.command == "edit":

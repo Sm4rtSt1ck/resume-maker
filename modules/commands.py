@@ -79,8 +79,13 @@ def command_make(args: argparse.Namespace, config: dict):
 
 def command_data(args: argparse.Namespace, config: dict):
     if args.data_file is None and not args.reset:
-        print(f"Current name of resume data file: {\
-            config.get("data_file", "data")}")
+        if args.list:
+            data_dir = BASE_DIR / "data"
+            data_files = sorted(p.stem for p in data_dir.glob("*.json"))
+            print(f"Available data files:\n{'\n'.join(f" - {f}" for f in data_files)}")
+        else:
+            print(f"Current name of resume data file: {\
+                config.get("data_file", "data")}")
 
     elif args.data_file is not None:
         write_config(config, "data_file", args.data_file)
@@ -167,6 +172,51 @@ def command_search(args: argparse.Namespace, config: dict):
         open_browser(config, found_files[0])
     else:
         print(f"No files found for position '{args.position}'.")
+
+
+def command_show(args: argparse.Namespace, config: dict):
+    def format_data(value, indent=0):
+        indent_str = " " * indent
+        if isinstance(value, dict):
+            if not value:
+                return f"{indent_str}NOT SET"
+            lines = []
+            for key, item in value.items():
+                if isinstance(item, (dict, list)):
+                    lines.append(f"{indent_str}{key.capitalize()}:")
+                    lines.append(format_data(item, indent + 2))
+                elif item is None or (isinstance(item, str) and item.strip() == ""):
+                    lines.append(f"{indent_str}{key.capitalize()}: NOT SET")
+                else:
+                    lines.append(f"{indent_str}{key.capitalize()}: {item}")
+            return "\n".join(lines)
+        if isinstance(value, list):
+            if not value:
+                return f"{indent_str}NOT SET"
+            lines = []
+            for item in value:
+                if isinstance(item, (dict, list)):
+                    lines.append(f"{indent_str}-")
+                    lines.append(format_data(item, indent + 2))
+                elif item is None or (isinstance(item, str) and item.strip() == ""):
+                    lines.append(f"{indent_str}- NOT SET")
+                else:
+                    lines.append(f"{indent_str}- {item}")
+            return "\n".join(lines)
+        if value is None or (isinstance(value, str) and value.strip() == ""):
+            return f"{indent_str}NOT SET"
+        return f"{indent_str}{value}"
+
+    data_file_name = args.data_file or config.get("data_file", "data")
+    data_file = BASE_DIR / f"data/{data_file_name}.json"
+    if not data_file.exists():
+        print(f"Error: data file '{data_file_name}' does not exist.")
+        sys.exit(1)
+
+    with open(data_file, encoding="utf-8") as f:
+        data = json.load(f)
+
+    print(format_data(data))
 
 
 def command_browser(args: argparse.Namespace, config: dict):
