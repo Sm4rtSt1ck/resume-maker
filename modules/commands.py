@@ -12,6 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from modules.consts import BASE_DIR
 from modules.utils import clickable_path, open_browser, write_config, remove_from_config
+from modules.colored_text import print_error, print_success, print_warning, print_info, Color
 
 
 def generate_html(data: dict, config: dict) -> str:
@@ -71,7 +72,7 @@ def command_make(args: argparse.Namespace, config: dict):
     
     write_config(config, "last_file", output_file)
 
-    print(f"Done: {clickable_path(output_file)}")
+    print_success(f"Done: {clickable_path(output_file)}")
 
     # Open browser
     open_browser(config, output_file)
@@ -82,39 +83,39 @@ def command_data(args: argparse.Namespace, config: dict):
         if args.list:
             data_dir = BASE_DIR / "data"
             data_files = sorted(p.stem for p in data_dir.glob("*.json"))
-            print(f"Available data files:\n{'\n'.join(f" - {f}" for f in data_files)}")
+            print_info(f"Available data files:\n{'\n'.join(f" - {f}" for f in data_files)}")
         else:
-            print(f"Current name of resume data file: {\
+            print_info(f"Current name of resume data file: {\
                 config.get("data_file", "data")}")
 
     elif args.data_file is not None:
         write_config(config, "data_file", args.data_file)
-        print(f"Name of data file set to: {args.data_file}")
+        print_success(f"Name of data file set to: {args.data_file}")
 
     elif args.reset:
         try:
             remove_from_config(config, "data_file")
-            print(f"Name of data file is reset to default: data")
+            print_success(f"Name of data file is reset to default: data")
         except KeyError:
-            print(f"Name of data file is already default: data")
+            print_info(f"Name of data file is already default: data")
 
 
 def command_output(args: argparse.Namespace, config: dict):
     if args.output_path is None and not args.reset:
-        print(f"Current path to output data: {\
+        print_info(f"Current path to output data: {\
             clickable_path(config.get("output_path", BASE_DIR / "output/"))}")
 
     elif args.output_path is not None:
         write_config(config, "output_path", args.output_path)
-        print(f"Output path set to: {args.output_path}")
+        print_success(f"Output path set to: {args.output_path}")
 
     elif args.reset:
         try:
             remove_from_config(config, "output_path")
-            print(f"Output path is reset to default: {\
+            print_success(f"Output path is reset to default: {\
                 clickable_path(BASE_DIR / "output/")}")
         except KeyError:
-            print(f"Output path is already default: {\
+            print_info(f"Output path is already default: {\
                 clickable_path(BASE_DIR / "output/")}")
 
 
@@ -126,34 +127,34 @@ def command_template(args: argparse.Namespace, config: dict):
         available = sorted(
             p.stem for p in templates_dir.glob("*.html")
         )
-        print(f"Current template: {current}")
-        print(f"Available templates: {', '.join(available)}")
+        print_success(f"Current template: {current}")
+        print_info(f"Available templates: {', '.join(available)}")
 
     elif args.template_name is not None:
         template_file = templates_dir / f"{args.template_name}.html"
         if not template_file.exists():
             available = sorted(p.stem for p in templates_dir.glob("*.html"))
-            print(f"Error: template '{args.template_name}' not found.")
-            print(f"Available templates: {', '.join(available)}")
+            print_error(f"Error: template '{args.template_name}' not found.")
+            print_info(f"Available templates: {', '.join(available)}")
             sys.exit(1)
         write_config(config, "template", args.template_name)
-        print(f"Template set to: {args.template_name}")
+        print_success(f"Template set to: {args.template_name}")
 
     elif args.reset:
         try:
             remove_from_config(config, "template")
-            print("Template is reset to default: classic")
+            print_success(f"Template is reset to default: classic")
         except KeyError:
-            print("Template is already default: classic")
+            print_info(f"Template is already default: classic")
 
 
 def command_last(config: dict):
     last_file = config.get("last_file")
     if last_file and Path(last_file).exists():
-        print(f"Last generated file: {clickable_path(last_file)}")
+        print_info(f"Last generated file: {clickable_path(last_file)}")
         open_browser(config, last_file)
     else:
-        print("No last generated file found.")
+        print_warning("No last generated file found.")
 
 
 def command_search(args: argparse.Namespace, config: dict):
@@ -164,47 +165,48 @@ def command_search(args: argparse.Namespace, config: dict):
     found_files = sorted(Path(output_dir).glob(pattern), key=os.path.getmtime, reverse=True)
 
     if len(found_files) > 1:
-        print(f"Found {len(found_files)} file(s) for position '{args.position}':")
+        print_success(f"Found {len(found_files)} file(s) for position '{args.position}':")
         for file in found_files:
             print(f"- {clickable_path(file)}")
     elif len(found_files) == 1:
-        print(f"Found 1 file for position '{args.position}': {clickable_path(found_files[0])}")
+        print_info(f"Found 1 file for position '{args.position}': {clickable_path(found_files[0])}")
         open_browser(config, found_files[0])
     else:
-        print(f"No files found for position '{args.position}'.")
+        print_warning(f"No files found for position '{args.position}'.")
 
 
 def command_show(args: argparse.Namespace, config: dict):
     def format_data(value, indent=0):
         indent_str = " " * indent
+        list_char = Color.yellow("-")
         if isinstance(value, dict):
             if not value:
-                return f"{indent_str}NOT SET"
+                return f"{indent_str}{Color.red('NOT SET')}"
             lines = []
             for key, item in value.items():
                 if isinstance(item, (dict, list)):
-                    lines.append(f"{indent_str}{key.capitalize()}:")
+                    lines.append(f"{indent_str}{Color.blue(key.capitalize())}:")
                     lines.append(format_data(item, indent + 2))
                 elif item is None or (isinstance(item, str) and item.strip() == ""):
-                    lines.append(f"{indent_str}{key.capitalize()}: NOT SET")
+                    lines.append(f"{indent_str}{Color.blue(key.capitalize())}: {Color.red('NOT SET')}")
                 else:
-                    lines.append(f"{indent_str}{key.capitalize()}: {item}")
+                    lines.append(f"{indent_str}{Color.blue(key.capitalize())}: {item}")
             return "\n".join(lines)
         if isinstance(value, list):
             if not value:
-                return f"{indent_str}NOT SET"
+                return f"{indent_str}{Color.red('NOT SET')}"
             lines = []
             for item in value:
                 if isinstance(item, (dict, list)):
-                    lines.append(f"{indent_str}-")
                     lines.append(format_data(item, indent + 2))
+                    lines.append("")
                 elif item is None or (isinstance(item, str) and item.strip() == ""):
-                    lines.append(f"{indent_str}- NOT SET")
+                    lines.append(f"{indent_str}{list_char} {Color.red('NOT SET')}")
                 else:
-                    lines.append(f"{indent_str}- {item}")
+                    lines.append(f"{indent_str}{list_char} {item}")
             return "\n".join(lines)
         if value is None or (isinstance(value, str) and value.strip() == ""):
-            return f"{indent_str}NOT SET"
+            return f"{indent_str}{Color.red('NOT SET')}"
         return f"{indent_str}{value}"
 
     data_file_name = args.data_file or config.get("data_file", "data")
@@ -216,17 +218,17 @@ def command_show(args: argparse.Namespace, config: dict):
     with open(data_file, encoding="utf-8") as f:
         data = json.load(f)
 
-    print(format_data(data))
+    print(f"{Color.magenta(str(f'---------- {data_file_name.upper()} ----------'))}\n{format_data(data)}")
 
 
 def command_browser(args: argparse.Namespace, config: dict):
     state = args.state.lower()
     if state == "on":
         write_config(config, "auto_open", True)
-        print("Auto-open in browser is turned ON.")
+        print_success("Auto-open in browser is turned ON.")
     elif state == "off":
         write_config(config, "auto_open", False)
-        print("Auto-open in browser is turned OFF.")
+        print_success("Auto-open in browser is turned OFF.")
 
 
 def command_edit(args: argparse.Namespace, config: dict):
@@ -245,15 +247,15 @@ def command_new(args: argparse.Namespace, config: dict):
 def command_remove(args: argparse.Namespace, config: dict):
     target_file = BASE_DIR / f"data/{args.data}.json"
     if not target_file.exists():
-        print(f"Error: data file '{args.data}' not found in 'data/' directory.")
+        print_error(f"Error: data file '{args.data}' not found in 'data/' directory.")
         sys.exit(1)
 
-    approve = input(f"Are you sure you want to remove '{args.data}'? (y/N): ")
+    approve = input(f"{Color.yellow('Are you sure you want to remove \'' + args.data + '\'? (y/N): ')}")
     if approve.lower() != 'y':
-        print("Operation cancelled.")
+        print_warning("Operation cancelled.")
         return
     try:
         os.remove(target_file)
-        print(f"Data file '{args.data}' has been removed.")
+        print_success(f"Data file '{args.data}' has been removed.")
     except Exception as e:
-        print(f"Error removing data file '{args.data}': {e}")
+        print_error(f"Error removing data file '{args.data}': {e}")
