@@ -76,10 +76,11 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
         "browser", help="Automatically open resumes in browser after generation or finding")
     browser_parser.add_argument("state", choices=["on", "off"], help="Turn auto-open in browser on or off")
     
-    # # Edit
-    # edit_parser = subparsers.add_parser(
-    #     "edit", help="Edit data file of a resume")
-    # edit_parser.add_argument("data", help="Name of data file to edit")
+    # Edit
+    edit_parser = subparsers.add_parser(
+        "edit", help="Edit data file of a resume")
+    edit_parser.add_argument("data", nargs="?", default=None,
+                             help="Name of data file to edit")
     
     # # New
     # new_parser = subparsers.add_parser(
@@ -122,8 +123,8 @@ def main():
         command_show(args, config)
     elif args.command == "browser":
         command_browser(args, config)
-    # elif args.command == "edit":
-    #     command_edit(args, config)
+    elif args.command == "edit":
+        command_edit(args, config)
     # elif args.command == "new":
     #     command_new(args, config)
     elif args.command == "remove":

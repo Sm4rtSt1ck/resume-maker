@@ -3,6 +3,7 @@ import sys
 import json
 import base64
 import argparse
+import subprocess
 
 import mimetypes
 
@@ -232,12 +233,19 @@ def command_browser(args: argparse.Namespace, config: dict):
 
 
 def command_edit(args: argparse.Namespace, config: dict):
-    # data_file = config.get("data_file", "data")
-    # target_file = BASE_DIR / f"data/{args.data}.json"
-    # if not target_file.exists():
-    #     print(f"Error: data file '{args.data}' not found in 'data/' directory.")
-    #     sys.exit(1)
-    pass
+    data_file_name = args.data or config.get("data_file", "data")
+    target_file = BASE_DIR / f"data/{data_file_name}.json"
+    if not target_file.exists():
+        print_warning(f"Error: data file '{data_file_name}' does not exist.")
+        sys.exit(1)
+    try:
+        if sys.platform == "win32":
+            subprocess.run(["notepad", str(target_file)])
+        else:
+            subprocess.run(["nano", str(target_file)])
+    except Exception as e:
+        print_error(f"Error opening editor: {e}")
+        sys.exit(1)
 
 
 def command_new(args: argparse.Namespace, config: dict):
@@ -247,7 +255,7 @@ def command_new(args: argparse.Namespace, config: dict):
 def command_remove(args: argparse.Namespace, config: dict):
     target_file = BASE_DIR / f"data/{args.data}.json"
     if not target_file.exists():
-        print_error(f"Error: data file '{args.data}' not found in 'data/' directory.")
+        print_warning(f"Error: data file '{args.data}' does not exist.")
         sys.exit(1)
 
     approve = input(f"{Color.yellow('Are you sure you want to remove \'' + args.data + '\'? (y/N): ')}")
