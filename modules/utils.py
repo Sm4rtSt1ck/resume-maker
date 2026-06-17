@@ -1,3 +1,7 @@
+import sys
+import os
+import webbrowser
+import subprocess
 import json
 
 from pathlib import Path
@@ -21,3 +25,20 @@ def remove_from_config(config: dict, key: str) -> None:
     config.pop(key)
     with open(BASE_DIR / "config.json", "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4, ensure_ascii=False)
+
+
+def open_browser(config, path: str | Path) -> None:
+    if not config.get("auto_open", True):
+        return
+    path_obj = Path(path).resolve()
+    if sys.platform == 'win32':
+        os.startfile(str(path_obj))
+    else:
+        file_url = path_obj.as_uri()
+        if sys.platform == 'darwin':
+            subprocess.Popen(['open', file_url])
+        else:
+            try:
+                subprocess.Popen(['xdg-open', file_url])
+            except OSError:
+                webbrowser.open(file_url)

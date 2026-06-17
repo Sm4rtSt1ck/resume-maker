@@ -5,15 +5,13 @@ import base64
 import argparse
 
 import mimetypes
-import webbrowser
-import subprocess
 
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
 from modules.consts import BASE_DIR
-from modules.utils import clickable_path, write_config, remove_from_config
+from modules.utils import clickable_path, open_browser, write_config, remove_from_config
 
 
 def generate_html(data: dict, config: dict) -> str:
@@ -70,27 +68,18 @@ def command_make(args: argparse.Namespace, config: dict):
     data["position"] = args.position
 
     output_file = generate_html(data, config)
+    
+    write_config(config, "last_file", output_file)
 
     print(f"Done: {clickable_path(output_file)}")
 
     # Open browser
-    path_obj = Path(output_file).resolve()
-    if sys.platform == 'win32':
-        os.startfile(str(path_obj))
-    else:
-        file_url = path_obj.as_uri()
-        if sys.platform == 'darwin':
-            subprocess.Popen(['open', file_url])
-        else:
-            try:
-                subprocess.Popen(['xdg-open', file_url])
-            except OSError:
-                webbrowser.open(file_url)
+    open_browser(config, output_file)
 
 
 def command_data(args: argparse.Namespace, config: dict):
     if args.data_file is None and not args.reset:
-        print(f"Current name of resume data file: {
+        print(f"Current name of resume data file: {\
             config.get("data_file", "data")}")
 
     elif args.data_file is not None:
@@ -107,7 +96,7 @@ def command_data(args: argparse.Namespace, config: dict):
 
 def command_output(args: argparse.Namespace, config: dict):
     if args.output_path is None and not args.reset:
-        print(f"Current path to output data: {
+        print(f"Current path to output data: {\
             clickable_path(config.get("output_path", BASE_DIR / "output/"))}")
 
     elif args.output_path is not None:
@@ -117,10 +106,10 @@ def command_output(args: argparse.Namespace, config: dict):
     elif args.reset:
         try:
             remove_from_config(config, "output_path")
-            print(f"Output path is reset to default: {
+            print(f"Output path is reset to default: {\
                 clickable_path(BASE_DIR / "output/")}")
         except KeyError:
-            print(f"Output path is already default: {
+            print(f"Output path is already default: {\
                 clickable_path(BASE_DIR / "output/")}")
 
 
@@ -151,3 +140,57 @@ def command_template(args: argparse.Namespace, config: dict):
             print("Template is reset to default: classic")
         except KeyError:
             print("Template is already default: classic")
+
+
+def command_last(config: dict):
+    last_file = config.get("last_file")
+    if last_file and Path(last_file).exists():
+        print(f"Last generated file: {clickable_path(last_file)}")
+        open_browser(config, last_file)
+    else:
+        print("No last generated file found.")
+
+
+def command_search(args: argparse.Namespace, config: dict):
+    output_dir = config.get("output_path", BASE_DIR / "output/")
+    position = args.position.replace(" ", "_").lower()
+    pattern = f"resume_*{position}*.html"
+
+    found_files = sorted(Path(output_dir).glob(pattern), key=os.path.getmtime, reverse=True)
+
+    if len(found_files) > 1:
+        print(f"Found {len(found_files)} file(s) for position '{args.position}':")
+        for file in found_files:
+            print(f"- {clickable_path(file)}")
+    elif len(found_files) == 1:
+        print(f"Found 1 file for position '{args.position}': {clickable_path(found_files[0])}")
+        open_browser(config, found_files[0])
+    else:
+        print(f"No files found for position '{args.position}'.")
+
+
+def command_browser(args: argparse.Namespace, config: dict):
+    state = args.state.lower()
+    if state == "on":
+        write_config(config, "auto_open", True)
+        print("Auto-open in browser is turned ON.")
+    elif state == "off":
+        write_config(config, "auto_open", False)
+        print("Auto-open in browser is turned OFF.")
+
+
+def command_edit(args: argparse.Namespace, config: dict):
+    # data_file = config.get("data_file", "data")
+    # target_file = BASE_DIR / f"data/{args.data}.json"
+    # if not target_file.exists():
+    #     print(f"Error: data file '{args.data}' not found in 'data/' directory.")
+    #     sys.exit(1)
+    pass
+
+
+def command_new(args: argparse.Namespace, config: dict):
+    pass
+
+
+def command_remove(args: argparse.Namespace, config: dict):
+    pass
