@@ -193,4 +193,17 @@ def command_new(args: argparse.Namespace, config: dict):
 
 
 def command_remove(args: argparse.Namespace, config: dict):
-    pass
+    target_file = BASE_DIR / f"data/{args.data}.json"
+    if not target_file.exists():
+        print(f"Error: data file '{args.data}' not found in 'data/' directory.")
+        sys.exit(1)
+
+    approve = input(f"Are you sure you want to remove '{args.data}'? (y/N): ")
+    if approve.lower() != 'y':
+        print("Operation cancelled.")
+        return
+    try:
+        os.remove(target_file)
+        print(f"Data file '{args.data}' has been removed.")
+    except Exception as e:
+        print(f"Error removing data file '{args.data}': {e}")

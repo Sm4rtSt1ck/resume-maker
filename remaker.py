@@ -79,10 +79,10 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     # new_parser.add_argument("data", help="Name of new data file")
     # new_parser.add_argument("-c", "--copy", help="Copy from other data file")
     
-    # # Remove
-    # remove_parser = subparsers.add_parser(
-    #     "remove", help="Remove a data file")
-    # remove_parser.add_argument("data", help="Name of data file to remove")
+    # Remove
+    remove_parser = subparsers.add_parser(
+        "remove", help="Remove a data file")
+    remove_parser.add_argument("data", help="Name of data file to remove")
 
     return parser
 
@@ -116,8 +116,8 @@ def main():
     #     command_edit(args, config)
     # elif args.command == "new":
     #     command_new(args, config)
-    # elif args.command == "remove":
-    #     command_remove(args, config)
+    elif args.command == "remove":
+        command_remove(args, config)
 
 
 if __name__ == "__main__":
