@@ -59,8 +59,11 @@ def generate_html(data: dict, config: dict) -> str:
 
 
 def command_make(args: argparse.Namespace, config: dict):
+    if args.data_file is None:
+        print_error("Error: no data file specified. Specify a data file with --data_file or set a default data file using the 'data' command.")
+        sys.exit(1)
     if not Path(BASE_DIR / ("data/" + args.data_file + ".json")).exists():
-        print(f"Error: file '{args.data_file}' not found")
+        print_error(f"Error: file '{args.data_file}' not found")
         sys.exit(1)
 
     with open(BASE_DIR / ("data/" + args.data_file + ".json"),
@@ -80,25 +83,18 @@ def command_make(args: argparse.Namespace, config: dict):
 
 
 def command_data(args: argparse.Namespace, config: dict):
-    if args.data_file is None and not args.reset:
+    if args.data_file is None:
         if args.list:
             data_dir = BASE_DIR / "data"
             data_files = sorted(p.stem for p in data_dir.glob("*.json"))
             print_info(f"Available data files:\n{'\n'.join(f" - {f}" for f in data_files)}")
         else:
             print_info(f"Current name of resume data file: {\
-                config.get("data_file", "data")}")
+                Color.green(config.get("data_file", Color.red("NOT SET")))}")
 
-    elif args.data_file is not None:
+    else:
         write_config(config, "data_file", args.data_file)
-        print_success(f"Name of data file set to: {args.data_file}")
-
-    elif args.reset:
-        try:
-            remove_from_config(config, "data_file")
-            print_success(f"Name of data file is reset to default: data")
-        except KeyError:
-            print_info(f"Name of data file is already default: data")
+        print_success(f"Name of current data file set to: {args.data_file}")
 
 
 def command_output(args: argparse.Namespace, config: dict):
@@ -213,7 +209,7 @@ def command_show(args: argparse.Namespace, config: dict):
     data_file_name = args.data_file or config.get("data_file", "data")
     data_file = BASE_DIR / f"data/{data_file_name}.json"
     if not data_file.exists():
-        print(f"Error: data file '{data_file_name}' does not exist.")
+        print(f"Error: data '{data_file_name}' does not exist.")
         sys.exit(1)
 
     with open(data_file, encoding="utf-8") as f:
@@ -249,7 +245,30 @@ def command_edit(args: argparse.Namespace, config: dict):
 
 
 def command_new(args: argparse.Namespace, config: dict):
-    pass
+    new_file_name = args.data
+    target_file = BASE_DIR / f"data/{new_file_name}.json"
+    if target_file.exists():
+        print_warning(f"Error: data '{new_file_name}' already exists.")
+        sys.exit(1)
+
+    if args.copy:
+        source_file = BASE_DIR / f"data/{args.copy}.json"
+        if not source_file.exists():
+            print_warning(f"Error: source data '{args.copy}' does not exist.")
+            sys.exit(1)
+        with open(source_file, encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        source_file = BASE_DIR / f"template.json"
+        with open(source_file, encoding="utf-8") as f:
+            data = json.load(f)
+
+    with open(target_file, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
+
+    print_success(f"New data file '{new_file_name}' has been created.")
+    
+    command_data(argparse.Namespace(data_file=new_file_name, list=False), config)
 
 
 def command_remove(args: argparse.Namespace, config: dict):
@@ -264,6 +283,8 @@ def command_remove(args: argparse.Namespace, config: dict):
         return
     try:
         os.remove(target_file)
-        print_success(f"Data file '{args.data}' has been removed.")
+        print_success(f"Data '{args.data}' has been removed.")
+        if config.get("data_file") == args.data:
+            remove_from_config(config, "data_file")
     except Exception as e:
         print_error(f"Error removing data file '{args.data}': {e}")

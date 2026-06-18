@@ -69,6 +69,7 @@ Add the project directory to your `PATH` so that `remaker.bat` is available syst
 Now you can run the tool from anywhere:
 
 ```bash
+remaker new data
 remaker make "Python Developer"
 ```
 
@@ -116,9 +117,10 @@ The phone number may not be specified; for this, the quotes must be blank
 ```json
 {
     "output_path": "output/",
-    "style_path": "style.css",
-    "data_file": "data.json",
-    "lang": "en"
+    "template": "classic",
+    "data_file": "data",
+    "last_file": "test.html",
+    "auto_open": true
 }
 ```
 

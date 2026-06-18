@@ -24,7 +24,7 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     make_parser.add_argument("position", help="Job position name")
     make_parser.add_argument(
         "-d", "--data_file",
-        default=config.get("data_file", "data"),
+        default=config.get("data_file"),
         help="Path to data file"
     )
 
@@ -32,8 +32,6 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     data_parser = subparsers.add_parser("data", help="Set name of data file")
     data_parser.add_argument("data_file", nargs="?",
                              help="Name of data file", default=None)
-    data_parser.add_argument("-r", "--reset", action="store_true",
-                             help="Reset to default")
     data_parser.add_argument("-l", "--list", action="store_true",
                              help="List all data files")
 
@@ -82,11 +80,11 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     edit_parser.add_argument("data", nargs="?", default=None,
                              help="Name of data file to edit")
     
-    # # New
-    # new_parser = subparsers.add_parser(
-    #     "new", help="Create a new data file for a resume")
-    # new_parser.add_argument("data", help="Name of new data file")
-    # new_parser.add_argument("-c", "--copy", help="Copy from other data file")
+    # New
+    new_parser = subparsers.add_parser(
+        "new", help="Create a new data file for a resume")
+    new_parser.add_argument("data", help="Name of new data file")
+    new_parser.add_argument("-c", "--copy", help="Copy from other data file")
     
     # Remove
     remove_parser = subparsers.add_parser(
@@ -125,8 +123,8 @@ def main():
         command_browser(args, config)
     elif args.command == "edit":
         command_edit(args, config)
-    # elif args.command == "new":
-    #     command_new(args, config)
+    elif args.command == "new":
+        command_new(args, config)
     elif args.command == "remove":
         command_remove(args, config)
 
