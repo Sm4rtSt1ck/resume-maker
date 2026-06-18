@@ -13,7 +13,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from modules.consts import BASE_DIR
 from modules.utils import clickable_path, open_browser, write_config, remove_from_config
-from modules.colored_text import print_error, print_success, print_warning, print_info, Color
+from modules.colored_text import print_error, print_success, print_warning, print_info, bullet, CType
 
 
 def generate_html(data: dict, config: dict) -> str:
@@ -84,17 +84,26 @@ def command_make(args: argparse.Namespace, config: dict):
 
 def command_data(args: argparse.Namespace, config: dict):
     if args.data_file is None:
-        if args.list:
-            data_dir = BASE_DIR / "data"
-            data_files = sorted(p.stem for p in data_dir.glob("*.json"))
-            print_info(f"Available data files:\n{'\n'.join(f" - {f}" for f in data_files)}")
-        else:
-            print_info(f"Current name of resume data file: {\
-                Color.green(config.get("data_file", Color.red("NOT SET")))}")
+        data_dir = BASE_DIR / "data"
 
-    else:
+        data_files = sorted(p.stem for p in data_dir.glob("*.json"))
+
+        current_file = config.get("data_file")
+        if current_file is not None:
+            data_files.remove(current_file)
+            data_files.append(f"{CType.success(current_file)} (current)")
+
+        print_info(f"Available data files:")
+        print("\n".join(f" {bullet()} {file}" for file in data_files))
+        if config.get('data_file') is None:
+            print_warning(f"Warning: current name of resume data file: {CType.error('NOT SET')}")
+
+    elif os.path.exists(BASE_DIR / ("data/" + args.data_file + ".json")):
         write_config(config, "data_file", args.data_file)
         print_success(f"Name of current data file set to: {args.data_file}")
+    else:
+        print_error(f"Error: data '{args.data_file}' does not exist.")
+        sys.exit(1)
 
 
 def command_output(args: argparse.Namespace, config: dict):
@@ -112,7 +121,7 @@ def command_output(args: argparse.Namespace, config: dict):
             print_success(f"Output path is reset to default: {\
                 clickable_path(BASE_DIR / "output/")}")
         except KeyError:
-            print_info(f"Output path is already default: {\
+            print_warning(f"Output path is already default: {\
                 clickable_path(BASE_DIR / "output/")}")
 
 
@@ -120,12 +129,15 @@ def command_template(args: argparse.Namespace, config: dict):
     templates_dir = BASE_DIR / "templates"
 
     if args.template_name is None and not args.reset:
-        current = config.get("template", "classic")
-        available = sorted(
-            p.stem for p in templates_dir.glob("*.html")
-        )
-        print_success(f"Current template: {current}")
-        print_info(f"Available templates: {', '.join(available)}")
+
+        template_files = sorted(p.stem for p in templates_dir.glob("*.html"))
+
+        current_template = config.get("template", "classic")
+        template_files.remove(current_template)
+        template_files.append(f"{CType.success(current_template)} (current)")
+
+        print_info(f"Available templates:")
+        print("\n".join(f" {bullet()} {file}" for file in template_files))
 
     elif args.template_name is not None:
         template_file = templates_dir / f"{args.template_name}.html"
@@ -142,7 +154,7 @@ def command_template(args: argparse.Namespace, config: dict):
             remove_from_config(config, "template")
             print_success(f"Template is reset to default: classic")
         except KeyError:
-            print_info(f"Template is already default: classic")
+            print_warning(f"Template is already default: classic")
 
 
 def command_last(config: dict):
@@ -162,7 +174,7 @@ def command_search(args: argparse.Namespace, config: dict):
     found_files = sorted(Path(output_dir).glob(pattern), key=os.path.getmtime, reverse=True)
 
     if len(found_files) > 1:
-        print_success(f"Found {len(found_files)} file(s) for position '{args.position}':")
+        print_info(f"Found {len(found_files)} file(s) for position '{args.position}':")
         for file in found_files:
             print(f"- {clickable_path(file)}")
     elif len(found_files) == 1:
@@ -175,47 +187,47 @@ def command_search(args: argparse.Namespace, config: dict):
 def command_show(args: argparse.Namespace, config: dict):
     def format_data(value, indent=0):
         indent_str = " " * indent
-        list_char = Color.yellow("-")
+        list_char = bullet()
         if isinstance(value, dict):
             if not value:
-                return f"{indent_str}{Color.red('NOT SET')}"
+                return f"{indent_str}{CType.error('NOT SET')}"
             lines = []
             for key, item in value.items():
                 if isinstance(item, (dict, list)):
-                    lines.append(f"{indent_str}{Color.blue(key.capitalize())}:")
+                    lines.append(f"{indent_str}{CType.info(key.capitalize())}:")
                     lines.append(format_data(item, indent + 2))
                 elif item is None or (isinstance(item, str) and item.strip() == ""):
-                    lines.append(f"{indent_str}{Color.blue(key.capitalize())}: {Color.red('NOT SET')}")
+                    lines.append(f"{indent_str}{CType.info(key.capitalize())}: {CType.error('NOT SET')}")
                 else:
-                    lines.append(f"{indent_str}{Color.blue(key.capitalize())}: {item}")
+                    lines.append(f"{indent_str}{CType.info(key.capitalize())}: {item}")
             return "\n".join(lines)
         if isinstance(value, list):
             if not value:
-                return f"{indent_str}{Color.red('NOT SET')}"
+                return f"{indent_str}{CType.error('NOT SET')}"
             lines = []
             for item in value:
                 if isinstance(item, (dict, list)):
                     lines.append(format_data(item, indent + 2))
                     lines.append("")
                 elif item is None or (isinstance(item, str) and item.strip() == ""):
-                    lines.append(f"{indent_str}{list_char} {Color.red('NOT SET')}")
+                    lines.append(f"{indent_str}{list_char} {CType.error('NOT SET')}")
                 else:
                     lines.append(f"{indent_str}{list_char} {item}")
             return "\n".join(lines)
         if value is None or (isinstance(value, str) and value.strip() == ""):
-            return f"{indent_str}{Color.red('NOT SET')}"
+            return f"{indent_str}{CType.error('NOT SET')}"
         return f"{indent_str}{value}"
 
     data_file_name = args.data_file or config.get("data_file", "data")
     data_file = BASE_DIR / f"data/{data_file_name}.json"
     if not data_file.exists():
-        print(f"Error: data '{data_file_name}' does not exist.")
+        print_error(f"Error: data '{data_file_name}' does not exist.")
         sys.exit(1)
 
     with open(data_file, encoding="utf-8") as f:
         data = json.load(f)
 
-    print(f"{Color.magenta(str(f'---------- {data_file_name.upper()} ----------'))}\n{format_data(data)}")
+    print(f"{CType.header(str(f'---------- {data_file_name.upper()} ----------'))}\n{format_data(data)}")
 
 
 def command_browser(args: argparse.Namespace, config: dict):
@@ -232,7 +244,7 @@ def command_edit(args: argparse.Namespace, config: dict):
     data_file_name = args.data or config.get("data_file", "data")
     target_file = BASE_DIR / f"data/{data_file_name}.json"
     if not target_file.exists():
-        print_warning(f"Error: data file '{data_file_name}' does not exist.")
+        print_error(f"Error: data '{data_file_name}' does not exist.")
         sys.exit(1)
     try:
         if sys.platform == "win32":
@@ -248,20 +260,24 @@ def command_new(args: argparse.Namespace, config: dict):
     new_file_name = args.data
     target_file = BASE_DIR / f"data/{new_file_name}.json"
     if target_file.exists():
-        print_warning(f"Error: data '{new_file_name}' already exists.")
+        print_error(f"Error: data '{new_file_name}' already exists.")
         sys.exit(1)
 
     if args.copy:
         source_file = BASE_DIR / f"data/{args.copy}.json"
         if not source_file.exists():
-            print_warning(f"Error: source data '{args.copy}' does not exist.")
+            print_error(f"Error: source data '{args.copy}' does not exist.")
             sys.exit(1)
         with open(source_file, encoding="utf-8") as f:
             data = json.load(f)
     else:
-        source_file = BASE_DIR / f"template.json"
-        with open(source_file, encoding="utf-8") as f:
-            data = json.load(f)
+        try:
+            source_file = BASE_DIR / f"template.json"
+            with open(source_file, encoding="utf-8") as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            print_error("Error: template file not found. Please reinstall the application or check the README.md file and create a template.json file in the root directory.")
+            sys.exit(1)
 
     with open(target_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
@@ -274,12 +290,12 @@ def command_new(args: argparse.Namespace, config: dict):
 def command_remove(args: argparse.Namespace, config: dict):
     target_file = BASE_DIR / f"data/{args.data}.json"
     if not target_file.exists():
-        print_warning(f"Error: data file '{args.data}' does not exist.")
+        print_error(f"Error: data file '{args.data}' does not exist.")
         sys.exit(1)
 
-    approve = input(f"{Color.yellow('Are you sure you want to remove \'' + args.data + '\'? (y/N): ')}")
+    approve = input(f"{CType.warning('Are you sure you want to remove \'' + args.data + '\'? (y/N): ')}")
     if approve.lower() != 'y':
-        print_warning("Operation cancelled.")
+        print_info("Operation cancelled.")
         return
     try:
         os.remove(target_file)

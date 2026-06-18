@@ -32,8 +32,6 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     data_parser = subparsers.add_parser("data", help="Set name of data file")
     data_parser.add_argument("data_file", nargs="?",
                              help="Name of data file", default=None)
-    data_parser.add_argument("-l", "--list", action="store_true",
-                             help="List all data files")
 
     # Output
     output_parser = subparsers.add_parser("output",

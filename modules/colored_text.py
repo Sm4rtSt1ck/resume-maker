@@ -38,6 +38,37 @@ class Color:
         return f"{colorama.Fore.WHITE}{text}{colorama.Style.RESET_ALL}"
 
 
+class CType:
+    
+    @staticmethod
+    def error(text: str) -> str:
+        return Color.red(text)
+
+    @staticmethod
+    def success(text: str) -> str:
+        return Color.green(text)
+
+    @staticmethod
+    def warning(text: str) -> str:
+        return Color.yellow(text)
+
+    @staticmethod
+    def info(text: str) -> str:
+        return Color.blue(text)
+
+    @staticmethod
+    def bullet(text: str) -> str:
+        return Color.cyan(text)
+
+    @staticmethod
+    def header(text: str) -> str:
+        return Color.magenta(text)
+    
+
+def bullet() -> str:
+    return CType.bullet("•")
+
+
 def print_colored(text: str, color: str) -> None:
     """
     Print text in the specified color.
@@ -55,6 +86,22 @@ def print_colored(text: str, color: str) -> None:
         print(text)  # Default to no color if the method doesn't exist
 
 
+def print_typed(text: str, ctype: str) -> None:
+    """
+    Print text with a specific type (e.g., error, success, warning, info).
+    
+    Args:
+        text (str): The text to print.
+        ctype (str): The type of message (e.g., 'error', 'success', 'warning', 'info').
+    """
+    ctype_method = getattr(CType, ctype.lower(), None)
+    
+    if callable(ctype_method):
+        print(ctype_method(text))
+    else:
+        print(text)  # Default to no color if the method doesn't exist
+
+
 def print_error(text: str):
     """
     Print an error message in red.
@@ -62,7 +109,7 @@ def print_error(text: str):
     Args:
         text (str): The error message to print.
     """
-    print_colored(text, 'red')
+    print_typed(text, 'error')
 
 
 def print_success(text: str):
@@ -72,7 +119,7 @@ def print_success(text: str):
     Args:
         text (str): The success message to print.
     """
-    print_colored(text, 'green')
+    print_typed(text, 'success')
 
 
 def print_warning(text: str):
@@ -82,7 +129,7 @@ def print_warning(text: str):
     Args:
         text (str): The warning message to print.
     """
-    print_colored(text, 'yellow')
+    print_typed(text, 'warning')
 
 
 def print_info(text: str):
@@ -92,4 +139,4 @@ def print_info(text: str):
     Args:
         text (str): The informational message to print.
     """
-    print_colored(text, 'blue')
+    print_typed(text, 'info')
