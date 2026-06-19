@@ -1,6 +1,5 @@
 {
-    "data_file": "data",
-    "template": "nord",
     "auto_open": true,
-    "last_file": ""
+    "last_file": "",
+    "template": "nord"
 }

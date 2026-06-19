@@ -24,7 +24,7 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     make_parser.add_argument("position", help="Job position name")
     make_parser.add_argument(
         "-d", "--data_file",
-        default=config.get("data_file", "data"),
+        default=config.get("data_file"),
         help="Path to data file"
     )
 
@@ -32,8 +32,6 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     data_parser = subparsers.add_parser("data", help="Set name of data file")
     data_parser.add_argument("data_file", nargs="?",
                              help="Name of data file", default=None)
-    data_parser.add_argument("-r", "--reset", action="store_true",
-                             help="Reset to default")
 
     # Output
     output_parser = subparsers.add_parser("output",
@@ -63,26 +61,33 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
         "search", help="Get created resume files for a position")
     search_parser.add_argument("position", help="Job position name")
     
+    # Show
+    show_parser = subparsers.add_parser(
+        "show", help="Show data in data file")
+    show_parser.add_argument("data_file", nargs="?", default=None,
+                             help="Name of data file to show")
+    
     # Browser
     browser_parser = subparsers.add_parser(
         "browser", help="Automatically open resumes in browser after generation or finding")
     browser_parser.add_argument("state", choices=["on", "off"], help="Turn auto-open in browser on or off")
     
-    # # Edit
-    # edit_parser = subparsers.add_parser(
-    #     "edit", help="Edit data file of a resume")
-    # edit_parser.add_argument("data", help="Name of data file to edit")
+    # Edit
+    edit_parser = subparsers.add_parser(
+        "edit", help="Edit data file of a resume")
+    edit_parser.add_argument("data", nargs="?", default=None,
+                             help="Name of data file to edit")
     
-    # # New
-    # new_parser = subparsers.add_parser(
-    #     "new", help="Create a new data file for a resume")
-    # new_parser.add_argument("data", help="Name of new data file")
-    # new_parser.add_argument("-c", "--copy", help="Copy from other data file")
+    # New
+    new_parser = subparsers.add_parser(
+        "new", help="Create a new data file for a resume")
+    new_parser.add_argument("data", help="Name of new data file")
+    new_parser.add_argument("-c", "--copy", help="Copy from other data file")
     
-    # # Remove
-    # remove_parser = subparsers.add_parser(
-    #     "remove", help="Remove a data file")
-    # remove_parser.add_argument("data", help="Name of data file to remove")
+    # Remove
+    remove_parser = subparsers.add_parser(
+        "remove", help="Remove a data file")
+    remove_parser.add_argument("data", help="Name of data file to remove")
 
     return parser
 
@@ -110,14 +115,16 @@ def main():
         command_last(config)
     elif args.command == "search":
         command_search(args, config)
+    elif args.command == "show":
+        command_show(args, config)
     elif args.command == "browser":
         command_browser(args, config)
-    # elif args.command == "edit":
-    #     command_edit(args, config)
-    # elif args.command == "new":
-    #     command_new(args, config)
-    # elif args.command == "remove":
-    #     command_remove(args, config)
+    elif args.command == "edit":
+        command_edit(args, config)
+    elif args.command == "new":
+        command_new(args, config)
+    elif args.command == "remove":
+        command_remove(args, config)
 
 
 if __name__ == "__main__":
