@@ -16,7 +16,7 @@ from modules.utils import clickable_path, open_browser, write_config, remove_fro
 from modules.colored_text import print_error, print_success, print_warning, print_info, bullet, CType
 
 
-def generate_html(data: dict, config: dict) -> str:
+def generate_html(data: dict, config: dict) -> Path:
     with open(BASE_DIR / "locales.json", encoding="utf-8") as f:
         locales = json.load(f)
 
@@ -24,8 +24,11 @@ def generate_html(data: dict, config: dict) -> str:
     t = locales.get(lang, locales["en"])
 
     photo_data_uri = None
-    photo_path = BASE_DIR / ("data/" + data.get("photo", "photo.png"))
-    if photo_path and Path(photo_path).exists():
+    photo_path = BASE_DIR / "data" / data.get("photo", "photo.png")
+    if Path(photo_path).exists() or Path(BASE_DIR / "data/popcat.png").exists():
+        if not Path(photo_path).exists():
+            print_warning(f"Warning: photo file '{photo_path}' not found. Popcat will be included in the resume instead.")
+            photo_path = BASE_DIR / "data/popcat.png"
         mime, _ = mimetypes.guess_type(photo_path)
         with open(photo_path, "rb") as f:
             encoded = base64.b64encode(f.read()).decode("utf-8")
@@ -50,7 +53,7 @@ def generate_html(data: dict, config: dict) -> str:
     os.makedirs(output_dir, exist_ok=True)
 
     position = data.get("position", "resume").replace(" ", "_").lower()
-    output_file = os.path.join(output_dir, f"resume_{position}.html")
+    output_file = Path(output_dir) / f"resume_{position}.html"
 
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(html)
@@ -62,11 +65,11 @@ def command_make(args: argparse.Namespace, config: dict):
     if args.data_file is None:
         print_error("Error: no data file specified. Specify a data file with --data_file or set a default data file using the 'data' command.")
         sys.exit(1)
-    if not Path(BASE_DIR / ("data/" + args.data_file + ".json")).exists():
+    if not Path(BASE_DIR / "data" / f"{args.data_file}.json").exists():
         print_error(f"Error: file '{args.data_file}' not found")
         sys.exit(1)
 
-    with open(BASE_DIR / ("data/" + args.data_file + ".json"),
+    with open(BASE_DIR / "data" / f"{args.data_file}.json",
               encoding="utf-8") as f:
         data = json.load(f)
 
@@ -89,18 +92,18 @@ def command_data(args: argparse.Namespace, config: dict):
         data_files = sorted(p.stem for p in data_dir.glob("*.json"))
 
         current_file = config.get("data_file")
-        if current_file is not None:
+        if current_file is not None and current_file in data_files:
             data_files.remove(current_file)
             data_files.append(f"{CType.success(current_file)} (current)")
 
         print_info(f"Available data files:")
         print("\n".join(f" {bullet()} {file}" for file in data_files))
         if config.get('data_file') is None:
-            print_warning(f"Warning: current name of resume data file: {CType.error('NOT SET')}")
+            print_warning(f"Warning: current name of resume data: {CType.error('NOT SET')}")
 
-    elif os.path.exists(BASE_DIR / ("data/" + args.data_file + ".json")):
+    elif Path.exists(BASE_DIR / "data" / f"{args.data_file}.json"):
         write_config(config, "data_file", args.data_file)
-        print_success(f"Name of current data file set to: {args.data_file}")
+        print_success(f"Name of current data set to: {args.data_file}")
     else:
         print_error(f"Error: data '{args.data_file}' does not exist.")
         sys.exit(1)
@@ -133,8 +136,11 @@ def command_template(args: argparse.Namespace, config: dict):
         template_files = sorted(p.stem for p in templates_dir.glob("*.html"))
 
         current_template = config.get("template", "classic")
-        template_files.remove(current_template)
-        template_files.append(f"{CType.success(current_template)} (current)")
+        if current_template in template_files:
+            template_files.remove(current_template)
+            template_files.append(f"{CType.success(current_template)} (current)")
+        else:
+            print_warning(f"Warning: current template: {CType.error('NOT SET')}")
 
         print_info(f"Available templates:")
         print("\n".join(f" {bullet()} {file}" for file in template_files))
@@ -279,12 +285,15 @@ def command_new(args: argparse.Namespace, config: dict):
             print_error("Error: template file not found. Please reinstall the application or check the README.md file and create a template.json file in the root directory.")
             sys.exit(1)
 
+    if not Path.exists(BASE_DIR / "data/"):
+        os.makedirs(BASE_DIR / "data/")
+
     with open(target_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
     print_success(f"New data file '{new_file_name}' has been created.")
     
-    command_data(argparse.Namespace(data_file=new_file_name, list=False), config)
+    command_data(argparse.Namespace(data_file=new_file_name), config)
 
 
 def command_remove(args: argparse.Namespace, config: dict):

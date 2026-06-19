@@ -1,5 +1,6 @@
 import sys
 import os
+import tempfile
 import webbrowser
 import subprocess
 import json
@@ -15,16 +16,26 @@ def clickable_path(path: str | Path) -> str:
     return f"\033]8;;{uri}\033\\{abs_path}\033]8;;\033\\"
 
 
+def _save_config(config: dict) -> None:
+    config_path = BASE_DIR / "config.json"
+    fd, tmp_path = tempfile.mkstemp(dir=config_path.parent, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=4, ensure_ascii=False)
+        os.replace(tmp_path, config_path)
+    except Exception:
+        os.unlink(tmp_path)
+        raise
+
+
 def write_config(config: dict, key: str, value) -> None:
-    config[key] = value
-    with open(BASE_DIR / "config.json", "w", encoding="utf-8") as f:
-        json.dump(config, f, indent=4, ensure_ascii=False)
+    config[key] = str(value) if isinstance(value, Path) else value
+    _save_config(config)
 
 
 def remove_from_config(config: dict, key: str) -> None:
     config.pop(key)
-    with open(BASE_DIR / "config.json", "w", encoding="utf-8") as f:
-        json.dump(config, f, indent=4, ensure_ascii=False)
+    _save_config(config)
 
 
 def open_browser(config, path: str | Path) -> None:
