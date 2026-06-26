@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import base64
+import shutil
 import argparse
 import subprocess
 
@@ -12,7 +13,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 from modules.consts import BASE_DIR
-from modules.utils import clickable_path, open_browser, write_config, remove_from_config
+from modules.utils import clickable_path, open_browser, write_config, remove_from_config, get_photo_from_resume
 from modules.colored_text import print_error, print_success, print_warning, print_info, bullet, CType
 
 
@@ -313,3 +314,105 @@ def command_remove(args: argparse.Namespace, config: dict):
             remove_from_config(config, "data_file")
     except Exception as e:
         print_error(f"Error removing data file '{args.data}': {e}")
+
+
+def command_export(args: argparse.Namespace, config: dict):
+    export_path = Path(args.path) / "REMAKER_EXPORT/"
+
+    # All data
+    if args.data == ["/"]:
+        data_to_export = sorted((BASE_DIR / "data").iterdir())
+        if not data_to_export:
+            print_error("Error: no data files found.")
+            sys.exit(1)
+    # Specified datas
+    elif args.data:
+        data_to_export = []
+        for name in args.data:
+            f = BASE_DIR / "data" / f"{name}.json"
+            if not f.exists():
+                print_error(f"Error: data '{name}' does not exist.")
+                sys.exit(1)
+            data_to_export.append(f)
+            try:
+                photo_name = get_photo_from_resume(f)
+                pf = BASE_DIR / "data" / photo_name
+                if pf.exists():
+                    data_to_export.append(pf)
+                else:
+                    print_warning(f"Warning: photo '{photo_name}' not found next to the data file, skipping.")
+            except (KeyError, json.JSONDecodeError):
+                pass
+    # Current default data
+    else:
+        default = config.get("data_file")
+        if not default:
+            print_error("Error: no data file specified and default is not set.")
+            sys.exit(1)
+        f = BASE_DIR / "data" / f"{default}.json"
+        if not f.exists():
+            print_error(f"Error: data '{default}' does not exist.")
+            sys.exit(1)
+        data_to_export = [f]
+        try:
+            photo_name = get_photo_from_resume(f)
+            pf = BASE_DIR / "data" / photo_name
+            if pf.exists():
+                data_to_export.append(pf)
+            else:
+                print_warning(f"Warning: photo '{photo_name}' not found next to the data file, skipping.")
+        except (KeyError, json.JSONDecodeError):
+            pass
+
+    if export_path.exists() and not export_path.is_dir():
+        print_error(f"Error: '{export_path}' already exists as a file, not a directory.")
+        sys.exit(1)
+    os.makedirs(export_path, exist_ok=True)
+    for src in data_to_export:
+        dst = export_path / src.name
+        shutil.copy2(src, dst)
+
+    print_success(f"Exported: {clickable_path(export_path)}")
+
+
+def command_import(args: argparse.Namespace):
+    source = Path(args.path)
+    dest_dir = BASE_DIR / "data"
+    image_exts = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"}
+
+    if not source.exists():
+        print_error(f"Error: '{source}' does not exist.")
+        sys.exit(1)
+
+    def _copy(src: Path, dst: Path):
+        if dst.exists():
+            answer = input(f"{CType.warning(f'File \'{dst.name}\' already exists. Overwrite? (y/N): ')}")
+            if answer.lower() != "y":
+                print_info(f"Skipped: {src.name}")
+                return
+        shutil.copy2(src, dst)
+        print_success(f"Imported: {clickable_path(dst)}")
+
+    if source.is_dir():
+        files = [f for f in source.iterdir()
+                 if f.suffix.lower() in image_exts or f.suffix.lower() == ".json"]
+        if not files:
+            print_error(f"Error: no JSON or image files found in '{source}'.")
+            sys.exit(1)
+        for f in files:
+            _copy(f, dest_dir / f.name)
+    else:
+        if not (source.suffix.lower() in image_exts or source.suffix.lower() == ".json"):
+            print_error(f"Error: '{source.name}' is not a JSON or image file.")
+            sys.exit(1)
+        _copy(source, dest_dir / source.name)
+        if source.suffix.lower() == ".json":
+            try:
+                photo_name = get_photo_from_resume(source)
+                photo_src = source.parent / photo_name
+                if photo_src.exists():
+                    _copy(photo_src, dest_dir / photo_src.name)
+                else:
+                    print_warning(f"Warning: photo '{photo_name}' not found next to the data file, skipping.")
+            except (KeyError, json.JSONDecodeError):
+                pass

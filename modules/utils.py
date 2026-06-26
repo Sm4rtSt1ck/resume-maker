@@ -53,3 +53,10 @@ def open_browser(config, path: str | Path) -> None:
                 subprocess.Popen(['xdg-open', file_url])
             except OSError:
                 webbrowser.open(file_url)
+
+
+def get_photo_from_resume(path: str | Path) -> str:
+    with open(path, "r") as f:
+        resume = json.load(f)
+        photo_path = resume["photo"]
+        return photo_path
