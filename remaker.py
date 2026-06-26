@@ -88,6 +88,17 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     remove_parser = subparsers.add_parser(
         "remove", help="Remove a data file")
     remove_parser.add_argument("data", help="Name of data file to remove")
+    
+    # Export
+    export_parser = subparsers.add_parser(
+        "export", help="Export data")
+    export_parser.add_argument("path", help="Path to exported data")
+    export_parser.add_argument("data", nargs="*", help="Name(s) of data to export (empty - current default, / - all)")
+
+    # Import
+    import_parser = subparsers.add_parser(
+        "import", help="Import data")
+    import_parser.add_argument("path", help="Path to imported data/folder")
 
     return parser
 
@@ -125,6 +136,10 @@ def main():
         command_new(args, config)
     elif args.command == "remove":
         command_remove(args, config)
+    elif args.command == "export":
+        command_export(args, config)
+    elif args.command == "import":
+        command_import(args)
 
 
 if __name__ == "__main__":
