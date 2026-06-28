@@ -12,6 +12,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
+from modules.html_to_pdf import html_to_pdf
 from modules.consts import BASE_DIR
 from modules.utils import clickable_path, open_browser, write_config, remove_from_config, get_photo_from_resume
 from modules.colored_text import print_error, print_success, print_warning, print_info, bullet, CType
@@ -77,13 +78,20 @@ def command_make(args: argparse.Namespace, config: dict):
     data["position"] = args.position
 
     output_file = generate_html(data, config)
-    
+
     write_config(config, "last_file", output_file)
 
     print_success(f"Done: {clickable_path(output_file)}")
 
     # Open browser
     open_browser(config, output_file)
+    if config.get("convert_to_pdf", True):
+        print_info("PDF is being converted...")
+        pdf_path = output_file.with_suffix(".pdf")
+        if html_to_pdf(output_file, pdf_path):
+            print_success(f"Done: {clickable_path(pdf_path)}")
+        else:
+            print_warning("Warning: no Chromium-based browser found, PDF generation skipped.")
 
 
 def command_data(args: argparse.Namespace, config: dict):
@@ -238,6 +246,9 @@ def command_show(args: argparse.Namespace, config: dict):
 
 
 def command_browser(args: argparse.Namespace, config: dict):
+    if args.state is None:
+        print_info(f"Auto-open in browser is {CType.highlight('enabled' if config.get('auto_open', True) else 'disabled')}")
+        return
     state = args.state.lower()
     if state == "on":
         write_config(config, "auto_open", True)
@@ -245,6 +256,19 @@ def command_browser(args: argparse.Namespace, config: dict):
     elif state == "off":
         write_config(config, "auto_open", False)
         print_success("Auto-open in browser is turned OFF.")
+
+
+def command_pdf(args: argparse.Namespace, config: dict):
+    if args.state is None:
+        print_info(f"Auto-conversion generated resumes to PDF is {CType.highlight("enabled" if config.get("convert_to_pdf", True) else "disabled")}")
+        return
+    state = args.state.lower()
+    if state == "on":
+        write_config(config, "convert_to_pdf", True)
+        print_success("Auto-conversion generated resumes to PDF is turned ON.")
+    elif state == "off":
+        write_config(config, "convert_to_pdf", False)
+        print_success("Auto-conversion generated resumes to PDF is turned OFF.")
 
 
 def command_edit(args: argparse.Namespace, config: dict):
