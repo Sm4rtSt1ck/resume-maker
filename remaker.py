@@ -78,12 +78,18 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     )
     pdf_parser.add_argument("state", nargs="?", choices=["on", "off"], help="Turn auto-convert generated resumes to PDF on or off")
 
+    rename_parser = subparsers.add_parser(
+        "rename", help="Rename data"
+    )
+    rename_parser.add_argument("old_name")
+    rename_parser.add_argument("new_name")
+
     # Edit
     edit_parser = subparsers.add_parser(
         "edit", help="Edit data file of a resume")
     edit_parser.add_argument("data", nargs="?", default=None,
                              help="Name of data file to edit")
-    
+
     # New
     new_parser = subparsers.add_parser(
         "new", help="Create a new data file for a resume")
@@ -109,9 +115,17 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     return parser
 
 
+def _load_config() -> dict:
+    config_path = BASE_DIR / "config.json"
+    try:
+        with open(config_path, encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
 def main():
-    with open(BASE_DIR / "config.json", encoding="utf-8") as f:
-        config = json.load(f)
+    config = _load_config()
 
     parser = build_parser(config)
     args = parser.parse_args()
@@ -148,6 +162,8 @@ def main():
         command_export(args, config)
     elif args.command == "import":
         command_import(args)
+    elif args.command == "rename":
+        command_rename(args, config)
 
 
 if __name__ == "__main__":

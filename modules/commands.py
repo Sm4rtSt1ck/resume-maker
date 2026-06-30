@@ -287,6 +287,22 @@ def command_edit(args: argparse.Namespace, config: dict):
         sys.exit(1)
 
 
+def command_rename(args: argparse.Namespace, config: dict):
+    old_path = BASE_DIR / f"data/{args.old_name}.json"
+    new_path = BASE_DIR / f"data/{args.new_name}.json"
+    
+    if new_path.exists():
+        print_error(f"Error: data '{CType.highlight(args.new_name)}{CType.error("' is already exist. Choose another name.")}")
+        sys.exit(1)
+
+    if old_path.exists():
+        old_path.rename(new_path)
+        print_success(f"Data '{CType.highlight(args.old_name)}{CType.success("' has been renamed to")} '{CType.highlight(args.new_name)}'")
+    else:
+        print_error(f"Error: data '{CType.highlight(args.old_name)}{CType.error("' does not exist.")}")
+        sys.exit(1)
+
+
 def command_new(args: argparse.Namespace, config: dict):
     new_file_name = args.data
     target_file = BASE_DIR / f"data/{new_file_name}.json"
