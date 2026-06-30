@@ -112,6 +112,12 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
         "import", help="Import data")
     import_parser.add_argument("path", help="Path to imported data/folder")
 
+    convert_parser = subparsers.add_parser(
+        "convert", help="Convert HTML resume to PDF"
+    )
+    convert_parser.add_argument("-n", "--name", default=config.get("last_file", None), nargs="?", help="Resume vacancy name / path to resume (e.g. 'backend_developer' or '~/Downloads/resume_backend_developer.html')")
+    convert_parser.add_argument("-o", "--output_path", default=config.get("output_path", BASE_DIR / "output/"), nargs="?", help="Output path (empty - current output path)")
+
     return parser
 
 
@@ -164,6 +170,8 @@ def main():
         command_import(args)
     elif args.command == "rename":
         command_rename(args, config)
+    elif args.command == "convert":
+        command_convert(args, config)
 
 
 if __name__ == "__main__":

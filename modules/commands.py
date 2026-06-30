@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import json
 import base64
@@ -456,3 +457,33 @@ def command_import(args: argparse.Namespace):
                     print_warning(f"Warning: photo '{photo_name}' not found next to the data file, skipping.")
             except (KeyError, json.JSONDecodeError):
                 pass
+
+
+def command_convert(args: argparse.Namespace, config: dict):
+    if args.name is None:
+            print_error("Error: no last generated file found.")
+            sys.exit(1)
+
+    if re.match(r'^[a-zA-Z0-9_]+$', args.name):
+        html_path = BASE_DIR / f"output/resume_{args.name}.html"
+    else:
+        html_path = Path(args.name)
+    if not html_path.exists():
+        print_error(f"Error: file '{html_path}' does not exist.")
+        sys.exit(1)
+
+    output_path = Path(args.output_path)
+
+    print_info("PDF is being converted...")
+
+    pdf_path = (output_path / Path(html_path).name).with_suffix(".pdf")
+
+    if pdf_path.exists():
+        if input(CType.warning(f"Warning: file '{pdf_path}' already exists. Rewrite? (y/N): ")).lower() != 'y':
+            print_info("Operation cancelled.")
+            return
+
+    if html_to_pdf(html_path, pdf_path):
+        print_success(f"Done: {clickable_path(pdf_path)}")
+    else:
+        print_error("Error: no Chromium-based browser found, PDF generation aborted.")
