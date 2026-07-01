@@ -38,7 +38,7 @@ def show_cancelled() -> None:
 def clickable_path(path: str | Path) -> str:
     abs_path = Path(path).resolve()
     uri = abs_path.as_uri()
-    return f"[link={uri}]{abs_path}[/link]"
+    return f"[turquoise2][link={uri}]{abs_path}[/link][/turquoise2]"
 
 
 def _save_config(config: dict) -> None:

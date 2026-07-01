@@ -88,7 +88,7 @@ def command_make(position: str, data_file: str | None, config: dict):
     output_file = generate_html(data, config)
     write_config(config, "last_file", output_file)
 
-    show_success(f"HTML saved to: [blue]{clickable_path(output_file)}[/]")
+    show_success(f"HTML: {clickable_path(output_file)}")
     open_browser(config, output_file)
 
     if config.get("convert_to_pdf", CONFIG_DEFAULTS["convert_to_pdf"]):
@@ -96,7 +96,7 @@ def command_make(position: str, data_file: str | None, config: dict):
             pdf_path = output_file.with_suffix(".pdf")
             result = html_to_pdf(output_file, pdf_path)
         if result:
-            show_success(f"PDF saved to: [blue]{clickable_path(pdf_path)}[/]")
+            show_success(f"PDF: {clickable_path(pdf_path)}")
         else:
             show_warning("No Chromium-based browser found — PDF generation skipped.")
 
