@@ -1,3 +1,4 @@
+config.json
 data/mydata*.json
 data/myphoto.*
 output/

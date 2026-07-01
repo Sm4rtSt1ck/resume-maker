@@ -63,7 +63,11 @@ class CType:
     @staticmethod
     def header(text: str) -> str:
         return Color.magenta(text)
-    
+
+    @staticmethod
+    def highlight(text: str) -> str:
+        return Color.magenta(text)
+
 
 def bullet() -> str:
     return CType.bullet("•")

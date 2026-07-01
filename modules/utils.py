@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from modules.consts import BASE_DIR
+from modules.defaults import CONFIG_DEFAULTS
 
 
 def clickable_path(path: str | Path) -> str:
@@ -39,7 +40,7 @@ def remove_from_config(config: dict, key: str) -> None:
 
 
 def open_browser(config, path: str | Path) -> None:
-    if not config.get("auto_open", True):
+    if not config.get("auto_open", CONFIG_DEFAULTS["auto_open"]):
         return
     path_obj = Path(path).resolve()
     if sys.platform == 'win32':

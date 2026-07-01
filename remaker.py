@@ -5,6 +5,7 @@ import argparse
 from modules.commands import *
 
 from modules.consts import VERSION, BASE_DIR
+from modules.defaults import CONFIG_DEFAULTS
 
 
 def build_parser(config: dict) -> argparse.ArgumentParser:
@@ -70,14 +71,26 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     # Browser
     browser_parser = subparsers.add_parser(
         "browser", help="Automatically open resumes in browser after generation or finding")
-    browser_parser.add_argument("state", choices=["on", "off"], help="Turn auto-open in browser on or off")
-    
+    browser_parser.add_argument("state", nargs="?", choices=["on", "off"], help="Turn auto-open in browser on or off")
+
+    # Convert to pdf
+    pdf_parser = subparsers.add_parser(
+        "pdf", help="Automatically convert generated resumes to PDF"
+    )
+    pdf_parser.add_argument("state", nargs="?", choices=["on", "off"], help="Turn auto-convert generated resumes to PDF on or off")
+
+    rename_parser = subparsers.add_parser(
+        "rename", help="Rename data"
+    )
+    rename_parser.add_argument("old_name")
+    rename_parser.add_argument("new_name")
+
     # Edit
     edit_parser = subparsers.add_parser(
         "edit", help="Edit data file of a resume")
     edit_parser.add_argument("data", nargs="?", default=None,
                              help="Name of data file to edit")
-    
+
     # New
     new_parser = subparsers.add_parser(
         "new", help="Create a new data file for a resume")
@@ -100,12 +113,31 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
         "import", help="Import data")
     import_parser.add_argument("path", help="Path to imported data/folder")
 
+    convert_parser = subparsers.add_parser(
+        "convert", help="Convert HTML resume to PDF"
+    )
+    convert_parser.add_argument("-n", "--name", default=config.get("last_file"), nargs="?", help="Resume vacancy name / path to resume (e.g. 'backend_developer' or '~/Downloads/resume_backend_developer.html')")
+    convert_parser.add_argument("-o", "--output_path", default=config.get("output_path", CONFIG_DEFAULTS["output_path"]), nargs="?", help="Output path (empty - current output path)")
+
+    config_parser = subparsers.add_parser("config", help="Show all configuration")
+
+    list_parser = subparsers.add_parser("list", help="List all data files")
+    list_parser.add_argument("type", choices=["html", "pdf", "all"], nargs="?", default="html", help="Type of files to list (default: html)")
+
     return parser
 
 
+def _load_config() -> dict:
+    config_path = BASE_DIR / "config.json"
+    try:
+        with open(config_path, encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
 def main():
-    with open(BASE_DIR / "config.json", encoding="utf-8") as f:
-        config = json.load(f)
+    config = _load_config()
 
     parser = build_parser(config)
     args = parser.parse_args()
@@ -130,6 +162,8 @@ def main():
         command_show(args, config)
     elif args.command == "browser":
         command_browser(args, config)
+    elif args.command == "pdf":
+        command_pdf(args, config)
     elif args.command == "edit":
         command_edit(args, config)
     elif args.command == "new":
@@ -140,6 +174,14 @@ def main():
         command_export(args, config)
     elif args.command == "import":
         command_import(args)
+    elif args.command == "rename":
+        command_rename(args, config)
+    elif args.command == "convert":
+        command_convert(args, config)
+    elif args.command == "config":
+        command_config(config)
+    elif args.command == "list":
+        command_list(args, config)
 
 
 if __name__ == "__main__":
