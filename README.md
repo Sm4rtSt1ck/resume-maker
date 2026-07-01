@@ -1,36 +1,23 @@
-# Resume maker
+# remaker
 
-HTML resume generator based on Jinja2 templates. Quickly make tailored resumes for different job positions by swapping out data files.
+HTML resume generator based on Jinja2 templates. Quickly create tailored resumes for different job positions by swapping out data files.
 
-## Project Structure
+## Features
 
-```
-remaker/
-├── remaker.py        # entry point
-├── remaker           # Linux/macOS wrapper script
-├── remaker.bat       # Windows wrapper script
-├── modules/
-├── template.html     # Jinja2 resume template
-├── style.css         # styles
-├── locales.json      # translations (ru/en)
-├── config.json       # settings
-├── requirements.txt
-├── output/           # generated resumes
-└── data/
-    ├── data.json     # default resume data
-    └── photo.png     # default photo
-```
+- **Multiple data files** - keep separate JSON profiles for different roles or industries
+- **Multiple templates** - switch between `classic`, `nord`, and `swiss` designs
+- **Auto-PDF conversion** - converts HTML to PDF using your installed Chromium browser
+- **Multi-language** - resume content supports `en` and `ru` locales
+- **Fully CLI-driven** - create, manage, search, and export resumes from the terminal
+
 
 ## Installation
 
-1. Clone the repository
+### 1. Clone and set up the virtual environment
+
 ```bash
 git clone https://github.com/Sm4rtSt1ck/resume-maker
 cd resume-maker
-```
-
-2. Create a virtual environment and install dependencies
-```bash
 python -m venv venv
 ```
 
@@ -46,148 +33,232 @@ venv\Scripts\activate.bat
 pip install -r requirements.txt
 ```
 
-### Setting up the CLI
+### 2. Set up the CLI shortcut
 
-#### Linux / macOS
-
-Make the wrapper script executable and create a symlink:
+**Linux / macOS** - make the wrapper executable and symlink it:
 
 ```bash
 chmod +x remaker
 sudo ln -sf "$(pwd)/remaker" /usr/local/bin/remaker
 ```
 
-#### Windows
-
-Add the project directory to your `PATH` so that `remaker.bat` is available system-wide:
+**Windows** - add the project directory to your `PATH`:
 
 1. Open **System Properties → Advanced → Environment Variables**
-2. Under **User variables**, select `Path` and click **Edit**
-3. Click **New** and paste the full path to the project directory (e.g. `C:\Projects\resume-maker`)
-4. Click **OK** and restart any open terminals
+2. Under **User variables**, select `Path` → **Edit → New**
+3. Paste the full project path (e.g. `C:\Projects\resume-maker`)
+4. Click OK and restart any open terminals
 
-Now you can run the tool from anywhere:
+### 3. PDF support (optional)
+
+PDF conversion uses a system-installed Chromium-based browser (Chrome, Brave, Edge, Vivaldi, Chromium, Opera). The tool searches `PATH` first, then checks standard install locations.
+
+**Windows:** Microsoft Edge is pre-installed on Windows 10/11 and is detected automatically - no extra steps needed.
+
+**Linux:** If no compatible browser is installed:
 
 ```bash
-remaker new data
+# Debian/Ubuntu
+sudo apt install chromium
+
+# Arch
+sudo pacman -S chromium
+```
+
+**macOS:** If no compatible browser is installed:
+
+```bash
+brew install --cask chromium
+```
+
+If no compatible browser is found, HTML generation still works normally.
+
+
+## Quick start
+
+```bash
+# Create a new data file and fill it in
+remaker new myprofile
+remaker edit myprofile
+
+# Generate a resume for a specific position
 remaker make "Python Developer"
+
+# List generated files
+remaker list
 ```
 
 
-## Resume Data
+## Data format
 
-Resume data and photo are stored in a JSON file in directory `data/`. `data.json` and `photo.png` are used by default.
+Data files are JSON stored in `data/`. Run `remaker new NAME` to create one from the built-in template.
 
-```json
+```jsonc
 {
-    "name": "John Doe",
-    "email": "john@mail.com",
-    "phone": "+12345678910",
-    "city": "Moscow",
+    "lang": "en",              // "en" or "ru"
+
+    "photo": "photo.png",      // filename inside data/
+    "name": "Name Surname",
     "birth_date": "01.01.2000",
-    "work_formats": ["office", "hybrid", "remote"],
-    "github": "https://github.com/username",
+
+    "phone": "+12345678910",   // leave "" to hide
+    "email": "email@example.com",
+    "github": "https://github.com/YourUserName",
     "telegram": "your_tag_without_at",
-    "photo": "photo.png",
-    "hobbies": ["Computer games", "Swimming", "Sleeping"],
-    "about": "I'm good boy, meow meow...",
+    "city": "Moscow",
+
+    "work_formats": ["office", "hybrid", "remote"],  // any subset or []
+
+    "about": "Short summary about yourself.",
+    "hobbies": ["Reading", "Cycling"],
+
     "education": [
-        ["2020–2024", "University", "Specialty", "Description (may be empty)"]
+        ["2020–2024", "University", "Computer Science", "Optional description"]
     ],
+
     "work_experience": [
-        ["2023–2024", "Company", "Position", "Description of responsibilities (may be empty)"]
+        ["2022–2024", "Company", "Backend Developer", "What you did there."]
     ],
+
     "skills": {
-        "Python": "high",
-        "SQL": "low",
-        "Git": "mid"
+        "Python": "high",      // high / mid / low
+        "SQL":    "mid",
+        "Docker": "low"
     }
 }
 ```
 
-Skill levels: `high`, `mid`, `low`\
-Work formats: `office`, `hybrid`, `remote`, this list can be empty\
-The phone number may not be specified; for this, the quotes must be blank
+**Notes:**
+- `work_formats` accepts any combination of `office`, `hybrid`, `remote`, or an empty list
+- Education and work experience entries: `[date_range, institution/company, role, description]` - description can be `""`
+- Skill levels: `high`, `mid`, `low`
+- `phone` can be `""` to omit it from the resume
+
+
+## Commands
+
+### Resume generation
+
+| Command | Description |
+|---|---|
+| `make POSITION` | Generate HTML resume (+ PDF if enabled) |
+| `make POSITION -d NAME` | Use a specific data file instead of the default |
+| `convert` | Convert the last generated HTML to PDF |
+| `convert -n NAME` | Convert by vacancy name or path to an HTML file |
+| `convert -o PATH` | Write PDF to a custom output directory |
+| `last` | Open the last generated resume in a browser |
+| `search POSITION` | Find generated files matching a position name |
+| `list` | List all generated HTML files |
+| `list pdf` | List PDF files |
+| `list all` | List all generated files |
+
+### Data management
+
+| Command | Description |
+|---|---|
+| `data` | Show available data files |
+| `data NAME` | Set the default data file |
+| `new NAME` | Create a new data file from the template |
+| `new NAME -c SOURCE` | Create a new data file by copying an existing one |
+| `edit [NAME]` | Open a data file in the system editor (nano / notepad) |
+| `remove NAME` | Delete a data file (prompts for confirmation) |
+| `rename OLD NEW` | Rename a data file |
+| `show [NAME]` | Display the contents of a data file |
+| `export PATH` | Export the default data file and its photo |
+| `export PATH name1 name2` | Export specific data files |
+| `export PATH /` | Export all data files |
+| `import PATH` | Import a data file or a directory of data files |
+
+### Configuration
+
+| Command | Description |
+|---|---|
+| `output` | Show the current output directory |
+| `output PATH` | Set the output directory |
+| `output --reset` | Reset to default (`output/`) |
+| `template` | List available templates |
+| `template NAME` | Set the active template |
+| `template --reset` | Reset to default (`classic`) |
+| `browser` | Show auto-open state |
+| `browser on\|off` | Toggle opening resumes in a browser after generation |
+| `pdf` | Show auto-convert state |
+| `pdf on\|off` | Toggle automatic PDF conversion after `make` |
+| `config` | Show all settings as a table |
+
+
+## Templates
+
+Three templates are included:
+
+| Name | Description |
+|---|---|
+| `classic` | Clean two-column layout, default |
+| `nord` | Dark nord-themed design |
+| `swiss` | Minimalist single-column style |
+
+Switch with:
+
+```bash
+remaker template nord
+```
+
+Custom templates can be added by placing a `.html` Jinja2 file in `templates/`.
 
 
 ## Configuration
 
-**`config.json`:**
+Settings are stored in `config.json` and managed through the CLI (`remaker config` to view).
 
-```json
-{
-    "output_path": "output/",
-    "template": "classic",
-    "data_file": "data",
-    "last_file": "test.html",
-    "auto_open": true
-}
-```
-
-You can use commands for configuration.
-
-| Command | Field | Description |
+| Key | Default | Description |
 |---|---|---|
-| output | `output_path` | folder for generated resumes |
-| data | `data_file` | path to resume data |
-| lang | `lang` | resume language (`ru` / `en`) |
+| `template` | `classic` | Active HTML template |
+| `data_file` | - | Default data file name |
+| `output_path` | `output/` | Directory for generated files |
+| `auto_open` | `true` | Open resume in browser after `make` |
+| `convert_to_pdf` | `true` | Auto-convert HTML to PDF after `make` |
+| `last_file` | - | Path to the last generated file (set automatically) |
 
 
-## Usage
+## Project structure
 
-#### Make a resume
-
-```bash
-remaker make "Python Developer"
+```
+resume-maker/
+├── remaker.py            # entry point
+├── remaker               # Linux/macOS shell wrapper
+├── remaker.bat           # Windows wrapper
+├── template.json         # blank data file used by `new`
+├── locales.json          # UI strings (en/ru)
+├── requirements.txt
+├── modules/
+│   ├── commands.py       # command implementations
+│   ├── consts.py         # BASE_DIR, VERSION
+│   ├── defaults.py       # config default values
+│   ├── html_to_pdf.py    # PDF conversion via Playwright
+│   └── utils.py          # console helpers, config I/O
+├── templates/
+│   ├── classic.html      # default Jinja2 template
+│   ├── nord.html
+│   └── swiss.html
+├── data/                 # your resume data files live here
+│   ├── myprofile.json
+│   └── photo.png
+└── output/               # generated resumes
+    ├── resume_python_developer.html
+    └── resume_python_developer.pdf
 ```
 
-With a custom data file:
-
-```bash
-remaker make "Python Developer" -dp your_data_file_name
-```
-
-Data is stored in `data/FILE_NAME.json`.
-
-#### Change language
-
-```bash
-# show current language
-remaker lang
-
-# set language
-remaker lang en
-```
-
-#### Change output path
-
-```bash
-# show current output path
-remaker output
-
-# set output path
-remaker output "Path/to/output/dir"
-
-# reset output path
-remaker output --reset
-```
-
-#### Help
-
-```bash
-remaker --help
-remaker make --help
-```
 
 ## Dependencies
 
 | Package | Purpose |
 |---|---|
-| `jinja2` | template engine |
+| `jinja2` | HTML template rendering |
+| `click` | CLI framework |
+| `rich` | Terminal output formatting |
+| `rich-click` | Rich-formatted `--help` output |
+| `playwright` | PDF generation via Chromium |
 
 
 ## License
 
-Code is licensed under the MIT License.
-
-See the [LICENSE](LICENSE) file for details.
+Code is licensed under the MIT License. See [LICENSE](LICENSE) for details.
