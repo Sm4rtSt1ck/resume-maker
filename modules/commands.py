@@ -294,7 +294,7 @@ def command_rename(args: argparse.Namespace, config: dict):
     new_path = BASE_DIR / f"data/{args.new_name}.json"
     
     if new_path.exists():
-        print_error(f"Error: data '{CType.highlight(args.new_name)}{CType.error("' is already exist. Choose another name.")}")
+        print_error(f"Error: data '{CType.highlight(args.new_name)}{CType.error("' already exists. Choose another name.")}")
         sys.exit(1)
 
     if old_path.exists():
@@ -475,7 +475,7 @@ def command_convert(args: argparse.Namespace, config: dict):
         print_error(f"Error: file '{html_path}' does not exist.")
         sys.exit(1)
 
-    output_path = Path(args.output_path)
+    output_path = Path(args.output_path if args.output_path is not None else config.get("output_path", CONFIG_DEFAULTS["output_path"]))
 
     print_info("PDF is being converted...")
 
@@ -526,11 +526,6 @@ def command_config(config: dict):
 
 def command_list(args: argparse.Namespace, config: dict):
     file_type = args.type
-
-    output_path = Path(config.get("output_path", CONFIG_DEFAULTS["output_path"]))
-    if not output_path.exists():
-        print_info("Output directory does not exist.")
-        return
 
     output_path = Path(config.get("output_path", CONFIG_DEFAULTS["output_path"]))
     if not output_path.exists():
