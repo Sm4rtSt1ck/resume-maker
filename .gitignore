@@ -1,6 +1,9 @@
 config.json
-data/mydata*.json
-data/myphoto.*
+
+!data/
+data/*
+!data/popcat.png
+
 output/
 
 # Byte-compiled / optimized / DLL files
