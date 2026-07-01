@@ -523,3 +523,39 @@ def command_config(config: dict):
     for cmd, param, value in rows:
         print(f" {CType.highlight(cmd.ljust(c1))}  {CType.info(param.ljust(c2))}  {value}")
 
+
+def command_list(args: argparse.Namespace, config: dict):
+    file_type = args.type
+
+    output_path = Path(config.get("output_path", CONFIG_DEFAULTS["output_path"]))
+    if not output_path.exists():
+        print_info("Output directory does not exist.")
+        return
+
+    output_path = Path(config.get("output_path", CONFIG_DEFAULTS["output_path"]))
+    if not output_path.exists():
+        print_info("Output directory does not exist.")
+        return
+
+    # Determine file patterns based on type
+    patterns = []
+    if file_type in ("html", "all"):
+        patterns.append("*.html")
+    if file_type in ("pdf", "all"):
+        patterns.append("*.pdf")
+    
+    files = []
+    for pattern in patterns:
+        files.extend(output_path.glob(pattern))
+    
+    files = sorted(files)
+    
+    if not files:
+        print_info(f"No generated resume files found ({file_type}).")
+        return
+
+    print(f"Generated resume files ({file_type}):")
+    for file in files:
+        size = file.stat().st_size / 1024  # Size in KB
+        created = __import__("datetime").datetime.fromtimestamp(file.stat().st_ctime)
+        print(f"{CType.bullet(created.strftime('%Y-%m-%d %H:%M:%S'))} - {clickable_path(file)} {CType.highlight(f'({size:.2f} KB)')}")

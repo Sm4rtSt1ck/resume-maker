@@ -121,6 +121,9 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
 
     config_parser = subparsers.add_parser("config", help="Show all configuration")
 
+    list_parser = subparsers.add_parser("list", help="List all data files")
+    list_parser.add_argument("type", choices=["html", "pdf", "all"], nargs="?", default="html", help="Type of files to list (default: html)")
+
     return parser
 
 
@@ -177,6 +180,8 @@ def main():
         command_convert(args, config)
     elif args.command == "config":
         command_config(config)
+    elif args.command == "list":
+        command_list(args, config)
 
 
 if __name__ == "__main__":
