@@ -1,130 +1,33 @@
-import sys
 import json
-import argparse
+import rich_click as click
 
-from modules.commands import *
-
+from modules.commands import (
+    command_make, command_data, command_output, command_template,
+    command_last, command_search, command_show, command_browser, command_pdf,
+    command_rename, command_edit, command_new, command_remove,
+    command_export, command_import, command_convert, command_config, command_list,
+)
 from modules.consts import VERSION, BASE_DIR
-from modules.defaults import CONFIG_DEFAULTS
 
-
-def build_parser(config: dict) -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="remaker",
-        description="HTML resume generator based on Jinja2 templates.\
-            Quickly make tailored resumes for different job positions \
-            by swapping out data files."
-    )
-    parser.add_argument("--version", action="version", version=VERSION)
-
-    subparsers = parser.add_subparsers(dest="command")
-
-    # Make
-    make_parser = subparsers.add_parser(
-        "make", help="Make resume from data file")
-    make_parser.add_argument("position", help="Job position name")
-    make_parser.add_argument(
-        "-d", "--data_file",
-        default=config.get("data_file"),
-        help="Path to data file"
-    )
-
-    # Data
-    data_parser = subparsers.add_parser("data", help="Set name of data file")
-    data_parser.add_argument("data_file", nargs="?",
-                             help="Name of data file", default=None)
-
-    # Output
-    output_parser = subparsers.add_parser("output",
-                                          help="Set path to output file")
-    output_parser.add_argument("output_path", nargs="?",
-                               help="Path to output file", default=None)
-    output_parser.add_argument("-r", "--reset", action="store_true",
-                               help="Reset to default")
-
-    # Template
-    template_parser = subparsers.add_parser(
-        "template", help="Set or show the active HTML template")
-    template_parser.add_argument(
-        "template_name", nargs="?",
-        help="Template name without .html extension (e.g. classic, swiss)",
-        default=None
-    )
-    template_parser.add_argument("-r", "--reset", action="store_true",
-                                 help="Reset to default (classic)")
-    
-    # Last
-    last_parser = subparsers.add_parser(
-        "last", help="Show the last generated resume file")
-    
-    # Search
-    search_parser = subparsers.add_parser(
-        "search", help="Get created resume files for a position")
-    search_parser.add_argument("position", help="Job position name")
-    
-    # Show
-    show_parser = subparsers.add_parser(
-        "show", help="Show data in data file")
-    show_parser.add_argument("data_file", nargs="?", default=None,
-                             help="Name of data file to show")
-    
-    # Browser
-    browser_parser = subparsers.add_parser(
-        "browser", help="Automatically open resumes in browser after generation or finding")
-    browser_parser.add_argument("state", nargs="?", choices=["on", "off"], help="Turn auto-open in browser on or off")
-
-    # Convert to pdf
-    pdf_parser = subparsers.add_parser(
-        "pdf", help="Automatically convert generated resumes to PDF"
-    )
-    pdf_parser.add_argument("state", nargs="?", choices=["on", "off"], help="Turn auto-convert generated resumes to PDF on or off")
-
-    rename_parser = subparsers.add_parser(
-        "rename", help="Rename data"
-    )
-    rename_parser.add_argument("old_name")
-    rename_parser.add_argument("new_name")
-
-    # Edit
-    edit_parser = subparsers.add_parser(
-        "edit", help="Edit data file of a resume")
-    edit_parser.add_argument("data", nargs="?", default=None,
-                             help="Name of data file to edit")
-
-    # New
-    new_parser = subparsers.add_parser(
-        "new", help="Create a new data file for a resume")
-    new_parser.add_argument("data", help="Name of new data file")
-    new_parser.add_argument("-c", "--copy", help="Copy from other data file")
-    
-    # Remove
-    remove_parser = subparsers.add_parser(
-        "remove", help="Remove a data file")
-    remove_parser.add_argument("data", help="Name of data file to remove")
-    
-    # Export
-    export_parser = subparsers.add_parser(
-        "export", help="Export data")
-    export_parser.add_argument("path", help="Path to exported data")
-    export_parser.add_argument("data", nargs="*", help="Name(s) of data to export (empty - current default, / - all)")
-
-    # Import
-    import_parser = subparsers.add_parser(
-        "import", help="Import data")
-    import_parser.add_argument("path", help="Path to imported data/folder")
-
-    convert_parser = subparsers.add_parser(
-        "convert", help="Convert HTML resume to PDF"
-    )
-    convert_parser.add_argument("-n", "--name", default=config.get("last_file"), nargs="?", help="Resume vacancy name / path to resume (e.g. 'backend_developer' or '~/Downloads/resume_backend_developer.html')")
-    convert_parser.add_argument("-o", "--output_path", default=config.get("output_path", CONFIG_DEFAULTS["output_path"]), nargs="?", help="Output path (empty - current output path)")
-
-    config_parser = subparsers.add_parser("config", help="Show all configuration")
-
-    list_parser = subparsers.add_parser("list", help="List all data files")
-    list_parser.add_argument("type", choices=["html", "pdf", "all"], nargs="?", default="html", help="Type of files to list (default: html)")
-
-    return parser
+click.rich_click.USE_RICH_MARKUP = True
+click.rich_click.SHOW_ARGUMENTS = True
+click.rich_click.GROUP_ARGUMENTS_OPTIONS = False
+click.rich_click.COMMAND_GROUPS = {
+    "remaker": [
+        {
+            "name": "Resume generation",
+            "commands": ["make", "convert", "last", "search", "list"],
+        },
+        {
+            "name": "Data management",
+            "commands": ["data", "new", "edit", "remove", "rename", "show", "export", "import"],
+        },
+        {
+            "name": "Configuration",
+            "commands": ["output", "template", "browser", "pdf", "config"],
+        },
+    ]
+}
 
 
 def _load_config() -> dict:
@@ -136,52 +39,178 @@ def _load_config() -> dict:
         return {}
 
 
+@click.group()
+@click.version_option(VERSION, prog_name="remaker")
+@click.pass_context
+def cli(ctx: click.Context):
+    """HTML resume generator based on Jinja2 templates.
+
+    Quickly make tailored resumes for different job positions
+    by swapping out data files.
+    """
+    ctx.ensure_object(dict)
+    ctx.obj = _load_config()
+
+
+# ─── Resume generation ──────────────────────────────────────────────────────
+
+@cli.command()
+@click.argument("position")
+@click.option("-d", "--data-file", default=None, help="Data file name (overrides default)")
+@click.pass_obj
+def make(config: dict, position: str, data_file: str | None):
+    """Generate a resume HTML (and optionally PDF) for a job POSITION."""
+    command_make(position, data_file or config.get("data_file"), config)
+
+
+@cli.command()
+@click.option("-n", "--name", default=None, help="Vacancy name or path to HTML file")
+@click.option("-o", "--output-path", "output_path", default=None, help="Output directory for the PDF")
+@click.pass_obj
+def convert(config: dict, name: str | None, output_path: str | None):
+    """Convert an HTML resume to PDF."""
+    command_convert(name or config.get("last_file"), output_path, config)
+
+
+@cli.command()
+@click.pass_obj
+def last(config: dict):
+    """Open the last generated resume in a browser."""
+    command_last(config)
+
+
+@cli.command()
+@click.argument("position")
+@click.pass_obj
+def search(config: dict, position: str):
+    """Find generated resume files matching a POSITION name."""
+    command_search(position, config)
+
+
+@cli.command(name="list")
+@click.argument("file_type", metavar="TYPE", required=False, default="html",
+                type=click.Choice(["html", "pdf", "all"]))
+@click.pass_obj
+def list_cmd(config: dict, file_type: str):
+    """List generated resume files. TYPE is html (default), pdf, or all."""
+    command_list(file_type, config)
+
+
+# ─── Data management ────────────────────────────────────────────────────────
+
+@cli.command()
+@click.argument("data_file", metavar="NAME", required=False, default=None)
+@click.pass_obj
+def data(config: dict, data_file: str | None):
+    """Set the default data file to NAME, or show available files."""
+    command_data(data_file, config)
+
+
+@cli.command()
+@click.argument("name")
+@click.option("-c", "--copy", default=None, metavar="SOURCE", help="Copy from an existing data file")
+@click.pass_obj
+def new(config: dict, name: str, copy: str | None):
+    """Create a new data file called NAME."""
+    command_new(name, copy, config)
+
+
+@cli.command()
+@click.argument("name", required=False, default=None)
+@click.pass_obj
+def edit(config: dict, name: str | None):
+    """Open a data file in the system editor."""
+    command_edit(name, config)
+
+
+@cli.command()
+@click.argument("name")
+@click.pass_obj
+def remove(config: dict, name: str):
+    """Delete a data file."""
+    command_remove(name, config)
+
+
+@cli.command()
+@click.argument("old_name")
+@click.argument("new_name")
+@click.pass_obj
+def rename(config: dict, old_name: str, new_name: str):
+    """Rename a data file from OLD_NAME to NEW_NAME."""
+    command_rename(old_name, new_name, config)
+
+
+@cli.command()
+@click.argument("name", required=False, default=None)
+@click.pass_obj
+def show(config: dict, name: str | None):
+    """Display the contents of a data file."""
+    command_show(name, config)
+
+
+@cli.command()
+@click.argument("path")
+@click.argument("names", metavar="[NAME]...", nargs=-1)
+@click.pass_obj
+def export(config: dict, path: str, names: tuple[str, ...]):
+    """Export data files to PATH. Pass / to export all."""
+    command_export(path, names, config)
+
+
+@cli.command(name="import")
+@click.argument("path")
+def import_cmd(path: str):
+    """Import data files from PATH (file or directory)."""
+    command_import(path)
+
+
+# ─── Configuration ──────────────────────────────────────────────────────────
+
+@cli.command()
+@click.argument("output_path", metavar="PATH", required=False, default=None)
+@click.option("-r", "--reset", is_flag=True, help="Reset to default")
+@click.pass_obj
+def output(config: dict, output_path: str | None, reset: bool):
+    """Set the output directory to PATH, or show the current value."""
+    command_output(output_path, reset, config)
+
+
+@cli.command()
+@click.argument("name", required=False, default=None)
+@click.option("-r", "--reset", is_flag=True, help="Reset to default (classic)")
+@click.pass_obj
+def template(config: dict, name: str | None, reset: bool):
+    """Set the active HTML template to NAME, or list available templates."""
+    command_template(name, reset, config)
+
+
+@cli.command()
+@click.argument("state", required=False, default=None,
+                type=click.Choice(["on", "off"]))
+@click.pass_obj
+def browser(config: dict, state: str | None):
+    """Toggle auto-open in browser (on/off), or show current state."""
+    command_browser(state, config)
+
+
+@cli.command()
+@click.argument("state", required=False, default=None,
+                type=click.Choice(["on", "off"]))
+@click.pass_obj
+def pdf(config: dict, state: str | None):
+    """Toggle auto-conversion to PDF (on/off), or show current state."""
+    command_pdf(state, config)
+
+
+@cli.command()
+@click.pass_obj
+def config(cfg: dict):
+    """Show all configuration as a table."""
+    command_config(cfg)
+
+
 def main():
-    config = _load_config()
-
-    parser = build_parser(config)
-    args = parser.parse_args()
-
-    if args.command is None:
-        parser.print_help()
-        sys.exit(1)
-
-    if args.command == "make":
-        command_make(args, config)
-    elif args.command == "data":
-        command_data(args, config)
-    elif args.command == "output":
-        command_output(args, config)
-    elif args.command == "template":
-        command_template(args, config)
-    elif args.command == "last":
-        command_last(config)
-    elif args.command == "search":
-        command_search(args, config)
-    elif args.command == "show":
-        command_show(args, config)
-    elif args.command == "browser":
-        command_browser(args, config)
-    elif args.command == "pdf":
-        command_pdf(args, config)
-    elif args.command == "edit":
-        command_edit(args, config)
-    elif args.command == "new":
-        command_new(args, config)
-    elif args.command == "remove":
-        command_remove(args, config)
-    elif args.command == "export":
-        command_export(args, config)
-    elif args.command == "import":
-        command_import(args)
-    elif args.command == "rename":
-        command_rename(args, config)
-    elif args.command == "convert":
-        command_convert(args, config)
-    elif args.command == "config":
-        command_config(config)
-    elif args.command == "list":
-        command_list(args, config)
+    cli(prog_name="remaker")
 
 
 if __name__ == "__main__":
