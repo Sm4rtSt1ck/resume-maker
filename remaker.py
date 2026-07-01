@@ -5,6 +5,7 @@ import argparse
 from modules.commands import *
 
 from modules.consts import VERSION, BASE_DIR
+from modules.defaults import CONFIG_DEFAULTS
 
 
 def build_parser(config: dict) -> argparse.ArgumentParser:
@@ -115,8 +116,10 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     convert_parser = subparsers.add_parser(
         "convert", help="Convert HTML resume to PDF"
     )
-    convert_parser.add_argument("-n", "--name", default=config.get("last_file", None), nargs="?", help="Resume vacancy name / path to resume (e.g. 'backend_developer' or '~/Downloads/resume_backend_developer.html')")
-    convert_parser.add_argument("-o", "--output_path", default=config.get("output_path", BASE_DIR / "output/"), nargs="?", help="Output path (empty - current output path)")
+    convert_parser.add_argument("-n", "--name", default=config.get("last_file"), nargs="?", help="Resume vacancy name / path to resume (e.g. 'backend_developer' or '~/Downloads/resume_backend_developer.html')")
+    convert_parser.add_argument("-o", "--output_path", default=config.get("output_path", CONFIG_DEFAULTS["output_path"]), nargs="?", help="Output path (empty - current output path)")
+
+    config_parser = subparsers.add_parser("config", help="Show all configuration")
 
     return parser
 
@@ -172,6 +175,8 @@ def main():
         command_rename(args, config)
     elif args.command == "convert":
         command_convert(args, config)
+    elif args.command == "config":
+        command_config(config)
 
 
 if __name__ == "__main__":

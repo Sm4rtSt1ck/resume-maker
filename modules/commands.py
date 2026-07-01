@@ -15,6 +15,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from modules.html_to_pdf import html_to_pdf
 from modules.consts import BASE_DIR
+from modules.defaults import CONFIG_DEFAULTS
 from modules.utils import clickable_path, open_browser, write_config, remove_from_config, get_photo_from_resume
 from modules.colored_text import print_error, print_success, print_warning, print_info, bullet, CType
 
@@ -37,7 +38,7 @@ def generate_html(data: dict, config: dict) -> Path:
             encoded = base64.b64encode(f.read()).decode("utf-8")
         photo_data_uri = f"data:{mime};base64,{encoded}"
 
-    template_name = config.get("template", "classic")
+    template_name = config.get("template", CONFIG_DEFAULTS["template"])
     templates_dir = BASE_DIR / "templates"
 
     template_file = templates_dir / f"{template_name}.html"
@@ -52,7 +53,7 @@ def generate_html(data: dict, config: dict) -> Path:
         t=t
     )
 
-    output_dir = config.get("output_path", BASE_DIR / "output/")
+    output_dir = config.get("output_path", CONFIG_DEFAULTS["output_path"])
     os.makedirs(output_dir, exist_ok=True)
 
     position = data.get("position", "resume").replace(" ", "_").lower()
@@ -86,7 +87,7 @@ def command_make(args: argparse.Namespace, config: dict):
 
     # Open browser
     open_browser(config, output_file)
-    if config.get("convert_to_pdf", True):
+    if config.get("convert_to_pdf", CONFIG_DEFAULTS["convert_to_pdf"]):
         print_info("PDF is being converted...")
         pdf_path = output_file.with_suffix(".pdf")
         if html_to_pdf(output_file, pdf_path):
@@ -122,7 +123,7 @@ def command_data(args: argparse.Namespace, config: dict):
 def command_output(args: argparse.Namespace, config: dict):
     if args.output_path is None and not args.reset:
         print_info(f"Current path to output data: {\
-            clickable_path(config.get("output_path", BASE_DIR / "output/"))}")
+            clickable_path(config.get("output_path", CONFIG_DEFAULTS["output_path"]))}")
 
     elif args.output_path is not None:
         write_config(config, "output_path", args.output_path)
@@ -132,10 +133,10 @@ def command_output(args: argparse.Namespace, config: dict):
         try:
             remove_from_config(config, "output_path")
             print_success(f"Output path is reset to default: {\
-                clickable_path(BASE_DIR / "output/")}")
+                clickable_path(CONFIG_DEFAULTS["output_path"])}")
         except KeyError:
             print_warning(f"Output path is already default: {\
-                clickable_path(BASE_DIR / "output/")}")
+                clickable_path(CONFIG_DEFAULTS["output_path"])}")
 
 
 def command_template(args: argparse.Namespace, config: dict):
@@ -145,7 +146,7 @@ def command_template(args: argparse.Namespace, config: dict):
 
         template_files = sorted(p.stem for p in templates_dir.glob("*.html"))
 
-        current_template = config.get("template", "classic")
+        current_template = config.get("template", CONFIG_DEFAULTS["template"])
         if current_template in template_files:
             template_files.remove(current_template)
             template_files.append(f"{CType.success(current_template)} (current)")
@@ -168,9 +169,9 @@ def command_template(args: argparse.Namespace, config: dict):
     elif args.reset:
         try:
             remove_from_config(config, "template")
-            print_success(f"Template is reset to default: classic")
+            print_success(f"Template is reset to default: {CONFIG_DEFAULTS['template']}")
         except KeyError:
-            print_warning(f"Template is already default: classic")
+            print_warning(f"Template is already default: {CONFIG_DEFAULTS['template']}")
 
 
 def command_last(config: dict):
@@ -183,7 +184,7 @@ def command_last(config: dict):
 
 
 def command_search(args: argparse.Namespace, config: dict):
-    output_dir = config.get("output_path", BASE_DIR / "output/")
+    output_dir = config.get("output_path", CONFIG_DEFAULTS["output_path"])
     position = args.position.replace(" ", "_").lower()
     pattern = f"resume_*{position}*.html"
 
@@ -248,7 +249,7 @@ def command_show(args: argparse.Namespace, config: dict):
 
 def command_browser(args: argparse.Namespace, config: dict):
     if args.state is None:
-        print_info(f"Auto-open in browser is {CType.highlight('enabled' if config.get('auto_open', True) else 'disabled')}")
+        print_info(f"Auto-open in browser is {CType.highlight('enabled' if config.get('auto_open', CONFIG_DEFAULTS['auto_open']) else 'disabled')}")
         return
     state = args.state.lower()
     if state == "on":
@@ -261,7 +262,7 @@ def command_browser(args: argparse.Namespace, config: dict):
 
 def command_pdf(args: argparse.Namespace, config: dict):
     if args.state is None:
-        print_info(f"Auto-conversion generated resumes to PDF is {CType.highlight("enabled" if config.get("convert_to_pdf", True) else "disabled")}")
+        print_info(f"Auto-conversion generated resumes to PDF is {CType.highlight("enabled" if config.get("convert_to_pdf", CONFIG_DEFAULTS["convert_to_pdf"]) else "disabled")}")
         return
     state = args.state.lower()
     if state == "on":
@@ -298,6 +299,8 @@ def command_rename(args: argparse.Namespace, config: dict):
 
     if old_path.exists():
         old_path.rename(new_path)
+        if config.get("data_file") == args.old_name:
+            write_config(config, "data_file", args.new_name)
         print_success(f"Data '{CType.highlight(args.old_name)}{CType.success("' has been renamed to")} '{CType.highlight(args.new_name)}'")
     else:
         print_error(f"Error: data '{CType.highlight(args.old_name)}{CType.error("' does not exist.")}")
@@ -487,3 +490,36 @@ def command_convert(args: argparse.Namespace, config: dict):
         print_success(f"Done: {clickable_path(pdf_path)}")
     else:
         print_error("Error: no Chromium-based browser found, PDF generation aborted.")
+
+
+def command_config(config: dict):
+    def fmt_bool(val: bool) -> str:
+        return CType.success("enabled") if val else CType.error("disabled")
+
+    last_file = config.get("last_file")
+    if last_file and not Path(last_file).exists():
+        last_val = CType.warning(f"{last_file} (not found)")
+    elif last_file:
+        last_val = clickable_path(last_file)
+    else:
+        last_val = CType.error("NOT SET")
+
+    data_file = config.get("data_file")
+    rows = [
+        ("template", "Template",               config.get("template", CONFIG_DEFAULTS["template"])),
+        ("data",     "Current data",           data_file if data_file else CType.error("NOT SET")),
+        ("browser",  "Auto-open in browser",   fmt_bool(config.get("auto_open",      CONFIG_DEFAULTS["auto_open"]))),
+        ("pdf",      "Auto-conversion to PDF", fmt_bool(config.get("convert_to_pdf", CONFIG_DEFAULTS["convert_to_pdf"]))),
+        ("output",   "Output path",            clickable_path(config.get("output_path", CONFIG_DEFAULTS["output_path"]))),
+        ("make",     "Last generated resume",  last_val),
+    ]
+
+    h = ("COMMAND", "PARAMETER", "VALUE")
+    c1 = max(len(h[0]), max(len(r[0]) for r in rows))
+    c2 = max(len(h[1]), max(len(r[1]) for r in rows))
+
+    print(f" {CType.header(h[0].ljust(c1))}  {CType.header(h[1].ljust(c2))}  {CType.header(h[2])}")
+    print(f" {'─' * (c1 + 2 + c2 + 2 + len(h[2]))}")
+    for cmd, param, value in rows:
+        print(f" {CType.highlight(cmd.ljust(c1))}  {CType.info(param.ljust(c2))}  {value}")
+
