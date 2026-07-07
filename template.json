@@ -17,45 +17,45 @@
     "hobbies": ["Computer games", "Swimming", "Sleeping"],
 
     "education": [
-        [
-            "date_from-date_to",
-            "Educational institution",
-            "Specialty",
-            "Description (may be empty)"
-        ],
-        [
-            "2023–2027",
-            "Moscow State University",
-            "Computer Science",
-            ""
-        ],
-        [
-            "2026",
-            "Aboba IT School",
-            "Backend development in Java",
-            "Bla bla bla..."
-        ],
-        [
-            "2025",
-            "Python development cources",
-            "Backend-development in Django",
-            "Bla bla bla bla bla bla bla..."
-        ]
+        {
+            "period": "date_from-date_to",
+            "place": "Educational institution",
+            "specialty": "Specialty",
+            "description": "Description (may be empty)"
+        },
+        {
+            "period": "2023–2027",
+            "place": "Moscow State University",
+            "specialty": "Computer Science",
+            "description": ""
+        },
+        {
+            "period": "2026",
+            "place": "Aboba IT School",
+            "specialty": "Backend development in Java",
+            "description": "Bla bla bla..."
+        },
+        {
+            "period": "2025",
+            "place": "Python development cources",
+            "specialty": "Backend-development in Django",
+            "description": "Bla bla bla bla bla bla bla..."
+        }
     ],
 
     "work_experience": [
-        [
-            "date_from-date_to",
-            "Company name",
-            "Position",
-            "Description of responsibilities (may be empty)"
-        ],
-        [
-            "2020–2025",
-            "Google",
-            "CEO",
-            "I managed Google and made an active contribution to the development of the company"
-        ]
+        {
+            "period": "date_from-date_to",
+            "place": "Company name",
+            "specialty": "Position",
+            "description": "Description of responsibilities (may be empty)"
+        },
+        {
+            "period": "2020–2025",
+            "place": "Google",
+            "specialty": "CEO",
+            "description": "I managed Google and made an active contribution to the development of the company"
+        }
     ],
 
     "skills": {

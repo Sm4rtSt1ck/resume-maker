@@ -387,12 +387,12 @@ body {
         {% for job in work_experience %}
         <div class="entry">
           <div class="entry-meta">
-            <span class="entry-period">{{ job[0] }}</span>
-            <span class="entry-company">{{ job[1] }}</span>
+            <span class="entry-period">{{ job.period }}</span>
+            <span class="entry-company">{{ job.place }}</span>
           </div>
-          <div class="entry-title">{{ job[2] }}</div>
-          {% if job[3] %}
-          <div class="entry-desc">{{ job[3] }}</div>
+          <div class="entry-title">{{ job.specialty }}</div>
+          {% if job.description %}
+          <div class="entry-desc">{{ job.description }}</div>
           {% endif %}
         </div>
         {% endfor %}
@@ -404,11 +404,11 @@ body {
         {% for edu in education %}
         <div class="entry">
           <div class="entry-meta">
-            <span class="entry-period">{{ edu[0] }}</span>
-            <span class="entry-company">{{ edu[1] }}</span>
+            <span class="entry-period">{{ edu.period }}</span>
+            <span class="entry-company">{{ edu.place }}</span>
           </div>
-          <div class="entry-title">{{ edu[2] }}</div>
-          <div class="entry-desc">{{ edu[3] }}</div>
+          <div class="entry-title">{{ edu.specialty }}</div>
+          <div class="entry-desc">{{ edu.description }}</div>
         </div>
         {% endfor %}
       </section>

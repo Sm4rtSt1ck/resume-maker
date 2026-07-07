@@ -27,7 +27,7 @@ from modules.utils import (
 )
 
 
-def generate_html(data: dict, config: dict) -> Path:
+def generate_html(data: dict, template: str, config: dict) -> Path:
     with open(BASE_DIR / "locales.json", encoding="utf-8") as f:
         locales = json.load(f)
 
@@ -45,16 +45,15 @@ def generate_html(data: dict, config: dict) -> Path:
             encoded = base64.b64encode(f.read()).decode("utf-8")
         photo_data_uri = f"data:{mime};base64,{encoded}"
 
-    template_name = config.get("template", CONFIG_DEFAULTS["template"])
     templates_dir = BASE_DIR / "templates"
 
-    template_file = templates_dir / f"{template_name}.html"
+    template_file = templates_dir / f"{template}.html"
     if not template_file.exists():
-        show_error(f"Template '[bold]{escape(template_name)}[/]' not found in {escape(str(templates_dir))}")
+        show_error(f"Template '[bold]{escape(template)}[/]' not found in {escape(str(templates_dir))}")
         sys.exit(1)
 
     env = Environment(loader=FileSystemLoader(templates_dir))
-    html = env.get_template(f"{template_name}.html").render(
+    html = env.get_template(f"{template}.html").render(
         **data,
         photo_data_uri=photo_data_uri,
         t=t
@@ -72,7 +71,7 @@ def generate_html(data: dict, config: dict) -> Path:
     return output_file
 
 
-def command_make(position: str, data_file: str | None, config: dict):
+def command_make(position: str, data_file: str | None, template: str | None, config: dict):
     if data_file is None:
         show_error("No data file specified. Use [bold]--data-file[/] or set a default with the [bold]data[/] command.")
         sys.exit(1)
@@ -85,7 +84,7 @@ def command_make(position: str, data_file: str | None, config: dict):
 
     data["position"] = position
 
-    output_file = generate_html(data, config)
+    output_file = generate_html(data, template or CONFIG_DEFAULTS["template"], config)
     write_config(config, "last_file", output_file)
 
     show_success(f"HTML: {clickable_path(output_file)}")

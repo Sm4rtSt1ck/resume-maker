@@ -537,13 +537,13 @@ body {
         {% for job in work_experience %}
         <div class="entry">
           <div class="entry-left">
-            <div class="entry-period">{{ job[0] }}</div>
-            <div class="entry-company">{{ job[1] }}</div>
+            <div class="entry-period">{{ job.period }}</div>
+            <div class="entry-company">{{ job.place }}</div>
           </div>
           <div class="entry-right">
-            <div class="entry-role">{{ job[2] }}</div>
-            {% if job[3] %}
-            <div class="entry-desc">{{ job[3] }}</div>
+            <div class="entry-role">{{ job.specialty }}</div>
+            {% if job.description %}
+            <div class="entry-desc">{{ job.description }}</div>
             {% endif %}
           </div>
         </div>
@@ -563,13 +563,13 @@ body {
         {% for edu in education %}
         <div class="entry">
           <div class="entry-left">
-            <div class="entry-period">{{ edu[0] }}</div>
-            <div class="entry-company">{{ edu[1] }}</div>
+            <div class="entry-period">{{ edu.period }}</div>
+            <div class="entry-company">{{ edu.place }}</div>
           </div>
           <div class="entry-right">
-            <div class="entry-role">{{ edu[2] }}</div>
-            {% if edu[3] %}
-            <div class="entry-desc">{{ edu[3] }}</div>
+            <div class="entry-role">{{ edu.specialty }}</div>
+            {% if edu.description %}
+            <div class="entry-desc">{{ edu.description }}</div>
             {% endif %}
           </div>
         </div>

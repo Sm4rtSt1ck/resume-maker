@@ -56,11 +56,12 @@ def cli(ctx: click.Context):
 
 @cli.command()
 @click.argument("position")
-@click.option("-d", "--data-file", default=None, help="Data file name (overrides default)")
+@click.option("-d", "--data-file", default=None, help="Data name (overrides default)")
+@click.option("-t", "--template", default=None, help="Template (overrides default)")
 @click.pass_obj
-def make(config: dict, position: str, data_file: str | None):
+def make(config: dict, position: str, data_file: str | None, template: str | None):
     """Generate a resume HTML (and optionally PDF) for a job POSITION."""
-    command_make(position, data_file or config.get("data_file"), config)
+    command_make(position, data_file or config.get("data_file"), template or config.get("template"), config)
 
 
 @cli.command()
