@@ -120,7 +120,7 @@ def new(config: dict, name: str, copy: str | None):
 @click.argument("name", required=False, default=None)
 @click.pass_obj
 def edit(config: dict, name: str | None):
-    """Open a data file in the system editor."""
+    """Edit a data file in the interactive TUI editor."""
     command_edit(name, config)
 
 

@@ -5,7 +5,6 @@ import json
 import base64
 import shutil
 import datetime
-import subprocess
 import mimetypes
 
 from pathlib import Path
@@ -27,50 +26,6 @@ from modules.utils import (
 )
 
 
-def generate_html(data: dict, template: str, config: dict) -> Path:
-    with open(BASE_DIR / "locales.json", encoding="utf-8") as f:
-        locales = json.load(f)
-
-    lang = data.get("lang", "en")
-    t = locales.get(lang, locales["en"])
-
-    photo_data_uri = None
-    photo_path = BASE_DIR / "data" / data.get("photo", "photo.png")
-    if Path(photo_path).exists() or Path(BASE_DIR / "data/popcat.png").exists():
-        if not Path(photo_path).exists():
-            show_warning(f"Photo '[bold]{escape(str(photo_path))}[/]' not found — using popcat instead.")
-            photo_path = BASE_DIR / "data/popcat.png"
-        mime, _ = mimetypes.guess_type(photo_path)
-        with open(photo_path, "rb") as f:
-            encoded = base64.b64encode(f.read()).decode("utf-8")
-        photo_data_uri = f"data:{mime};base64,{encoded}"
-
-    templates_dir = BASE_DIR / "templates"
-
-    template_file = templates_dir / f"{template}.html"
-    if not template_file.exists():
-        show_error(f"Template '[bold]{escape(template)}[/]' not found in {escape(str(templates_dir))}")
-        sys.exit(1)
-
-    env = Environment(loader=FileSystemLoader(templates_dir))
-    html = env.get_template(f"{template}.html").render(
-        **data,
-        photo_data_uri=photo_data_uri,
-        t=t
-    )
-
-    output_dir = config.get("output_path", CONFIG_DEFAULTS["output_path"])
-    os.makedirs(output_dir, exist_ok=True)
-
-    position = data.get("position", "resume").replace(" ", "_").lower()
-    output_file = Path(output_dir) / f"resume_{position}.html"
-
-    with open(output_file, "w", encoding="utf-8") as f:
-        f.write(html)
-
-    return output_file
-
-
 def command_make(position: str, data_file: str | None, template: str | None, config: dict):
     if data_file is None:
         show_error("No data file specified. Use [bold]--data-file[/] or set a default with the [bold]data[/] command.")
@@ -78,6 +33,50 @@ def command_make(position: str, data_file: str | None, template: str | None, con
     if not Path(BASE_DIR / "data" / f"{data_file}.json").exists():
         show_error(f"File '[bold]{escape(data_file)}[/]' not found.")
         sys.exit(1)
+
+    def generate_html(data: dict, template: str, config: dict) -> Path:
+        with open(BASE_DIR / "locales.json", encoding="utf-8") as f:
+            locales = json.load(f)
+
+        lang = data.get("lang", "en")
+        t = locales.get(lang, locales["en"])
+
+        photo_data_uri = None
+        photo_path = BASE_DIR / "data" / data.get("photo", "photo.png")
+        if Path(photo_path).exists() or Path(BASE_DIR / "data/popcat.png").exists():
+            if not Path(photo_path).exists():
+                show_warning(f"Photo '[bold]{escape(str(photo_path))}[/]' not found — using popcat instead.")
+                photo_path = BASE_DIR / "data/popcat.png"
+            mime, _ = mimetypes.guess_type(photo_path)
+            with open(photo_path, "rb") as f:
+                encoded = base64.b64encode(f.read()).decode("utf-8")
+            photo_data_uri = f"data:{mime};base64,{encoded}"
+
+        templates_dir = BASE_DIR / "templates"
+
+        template_file = templates_dir / f"{template}.html"
+        if not template_file.exists():
+            show_error(f"Template '[bold]{escape(template)}[/]' not found in {escape(str(templates_dir))}")
+            sys.exit(1)
+
+        env = Environment(loader=FileSystemLoader(templates_dir))
+        html = env.get_template(f"{template}.html").render(
+            **data,
+            photo_data_uri=photo_data_uri,
+            t=t
+        )
+
+        output_dir = config.get("output_path", CONFIG_DEFAULTS["output_path"])
+        os.makedirs(output_dir, exist_ok=True)
+
+        position = data.get("position", "resume").replace(" ", "_").lower()
+        output_file = Path(output_dir) / f"resume_{position}.html"
+
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(html)
+
+        return output_file
+
 
     with open(BASE_DIR / "data" / f"{data_file}.json", encoding="utf-8") as f:
         data = json.load(f)
@@ -289,12 +288,22 @@ def command_edit(data: str | None, config: dict):
     if not target.exists():
         show_error(f"Data '[bold]{escape(name)}[/]' does not exist.")
         sys.exit(1)
+
     try:
-        editor = "notepad" if sys.platform == "win32" else "nano"
-        subprocess.run([editor, str(target)])
-    except Exception as e:
-        show_error(f"Error opening editor: {escape(str(e))}")
+        with open(target, encoding="utf-8") as f:
+            content = json.load(f)
+        if not isinstance(content, dict):
+            raise ValueError("root must be a JSON object")
+    except (json.JSONDecodeError, ValueError) as e:
+        show_error(f"'[bold]{escape(name)}[/]' is not a valid data file: {escape(str(e))}")
         sys.exit(1)
+
+    from modules.editor import run_editor
+
+    if run_editor(target):
+        show_success(f"Saved {clickable_path(target)}")
+    else:
+        show_cancelled()
 
 
 def command_rename(old_name: str, new_name: str, config: dict):

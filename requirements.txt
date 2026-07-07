@@ -4,3 +4,4 @@ MarkupSafe==3.0.3
 playwright==1.60.0
 rich==15.0.0
 rich-click==1.9.8
+textual==8.2.8
