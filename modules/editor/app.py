@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from rich.markup import escape
+from rich.text import Text
 from textual.app import App
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, VerticalScroll
@@ -80,7 +81,9 @@ class ExitConfirmScreen(ModalScreen[str]):
         dialog = Vertical(id="dialog")
         dialog.border_title = "Unsaved changes"
         with dialog:
-            yield Static(f"Save changes to [bold cyan]{escape(self.file_name)}[/] before exiting?")
+            yield Static(Text.from_markup(
+                f"Save changes to [bold cyan]{escape(self.file_name)}[/] before exiting?"
+            ))
             with Horizontal(id="dialog-buttons"):
                 yield Button("Save & exit (y)", variant="success", id="save")
                 yield Button("Discard (n)", variant="error", id="discard")
@@ -147,7 +150,7 @@ class EditorApp(App[None]):
                 widget = build_field_widget(spec, self.data.get(spec.key))
                 self._field_widgets.append((spec.key, widget))
                 yield widget
-        sidebar = Static(LEGEND, id="sidebar")
+        sidebar = Static(Text.from_markup(LEGEND), id="sidebar")
         sidebar.border_title = "Keys"
         yield sidebar
 

@@ -7,6 +7,8 @@ import shutil
 import datetime
 import mimetypes
 
+import yaml
+
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
@@ -35,8 +37,8 @@ def command_make(position: str, data_file: str | None, template: str | None, con
         sys.exit(1)
 
     def generate_html(data: dict, template: str, config: dict) -> Path:
-        with open(BASE_DIR / "locales.json", encoding="utf-8") as f:
-            locales = json.load(f)
+        with open(BASE_DIR / "locales.yml", encoding="utf-8") as f:
+            locales = yaml.safe_load(f)
 
         lang = data.get("lang", "en")
         t = locales.get(lang, locales["en"])

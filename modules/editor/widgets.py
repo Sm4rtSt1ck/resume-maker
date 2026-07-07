@@ -16,6 +16,7 @@ from __future__ import annotations
 from typing import Iterable
 
 from rich.markup import escape
+from rich.text import Text
 from textual import events
 from textual.containers import Vertical
 from textual.message import Message
@@ -29,6 +30,15 @@ from modules.editor.schema import (
 
 NOT_SET = "[red]NOT SET[/]"
 LEVEL_COLORS = {"low": "red", "mid": "yellow", "high": "green"}
+
+
+def markup(text: str) -> Text:
+    """Rich markup -> Text.
+
+    Textual 8 parses plain strings with its own Content markup, which folds
+    whitespace; going through rich.Text keeps spacing exactly as written.
+    """
+    return Text.from_markup(text)
 
 
 class DataChanged(Message):
@@ -136,13 +146,13 @@ class EditableRow(Row):
 
     def compose(self):
         if self.bullet:
-            yield Static("[cyan]•[/] ", classes="field-label")
+            yield Static(markup("[cyan]•[/] "), classes="field-label")
         elif self.field_label is not None:
-            yield Static(f"[cyan]{escape(self.field_label)}[/]: ", classes="field-label")
-        yield Static(self._value_markup(), classes="field-value")
+            yield Static(markup(f"[cyan]{escape(self.field_label)}[/]: "), classes="field-label")
+        yield Static(self._value_text(), classes="field-value")
 
-    def _value_markup(self) -> str:
-        return escape(self.value) if self.value.strip() else NOT_SET
+    def _value_text(self) -> Text:
+        return markup(escape(self.value) if self.value.strip() else NOT_SET)
 
     async def activate(self) -> None:
         await self.start_edit()
@@ -169,7 +179,7 @@ class EditableRow(Row):
         changed = commit and new_value != self.value
         if changed:
             self.value = new_value
-            display.update(self._value_markup())
+            display.update(self._value_text())
         if self.discard_if_empty and not self.value.strip() and self.owner is not None:
             await self.owner.discard_row(self, changed=changed, refocus=refocus)
             return
@@ -212,7 +222,7 @@ class AddRow(Row):
         self.owner = owner
 
     def render(self):
-        return f"[green]+[/] [dim]{escape(self.caption)}[/]"
+        return markup(f"[green]+[/] [dim]{escape(self.caption)}[/]")
 
     async def activate(self) -> None:
         await self.owner.add_entry()
@@ -226,7 +236,7 @@ class SectionHeader(Row):
         self.section = section
 
     def render(self):
-        return self.section.header_markup()
+        return markup(self.section.header_markup())
 
     async def activate(self) -> None:
         self.section.toggle()
@@ -480,7 +490,7 @@ class ChoiceRow(Row):
             if index == self.cursor and self.has_focus:
                 cell = f"[reverse]{cell}[/]"
             parts.append(cell)
-        return "  ".join(parts)
+        return markup("  ".join(parts))
 
     async def activate(self) -> None:
         option = self.spec.options[self.cursor]
@@ -534,7 +544,7 @@ class SkillColumn(Vertical):
 
     def compose(self):
         color = LEVEL_COLORS.get(self.level, "cyan")
-        yield Static(f"[bold {color}]{escape(self.level.upper())}[/]",
+        yield Static(markup(f"[bold {color}]{escape(self.level.upper())}[/]"),
                      classes="skill-column-title")
         for name in self._initial:
             yield EditableRow(name, bullet=True, owner=self, discard_if_empty=True)

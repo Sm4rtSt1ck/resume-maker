@@ -5,6 +5,7 @@ HTML resume generator based on Jinja2 templates. Quickly create tailored resumes
 ## Features
 
 - **Multiple data files** - keep separate JSON profiles for different roles or industries
+- **Interactive TUI editor** - edit resume data right in the terminal with `remaker edit`
 - **Multiple templates** - switch between `classic`, `nord`, and `swiss` designs
 - **Auto-PDF conversion** - converts HTML to PDF using your installed Chromium browser
 - **Multi-language** - resume content supports `en` and `ru` locales
@@ -160,7 +161,7 @@ Data files are JSON stored in `data/`. Run `remaker new NAME` to create one from
 | `data NAME` | Set the default data file |
 | `new NAME` | Create a new data file from the template |
 | `new NAME -c SOURCE` | Create a new data file by copying an existing one |
-| `edit [NAME]` | Open a data file in the system editor (nano / notepad) |
+| `edit [NAME]` | Edit a data file in the interactive TUI editor |
 | `remove NAME` | Delete a data file (prompts for confirmation) |
 | `rename OLD NEW` | Rename a data file |
 | `show [NAME]` | Display the contents of a data file |
@@ -227,14 +228,18 @@ resume-maker/
 ├── remaker               # Linux/macOS shell wrapper
 ├── remaker.bat           # Windows wrapper
 ├── template.json         # blank data file used by `new`
-├── locales.json          # UI strings (en/ru)
+├── locales.yml           # UI strings (en/ru)
 ├── requirements.txt
 ├── modules/
 │   ├── commands.py       # command implementations
 │   ├── consts.py         # BASE_DIR, VERSION
 │   ├── defaults.py       # config default values
 │   ├── html_to_pdf.py    # PDF conversion via Playwright
-│   └── utils.py          # console helpers, config I/O
+│   ├── utils.py          # console helpers, config I/O
+│   └── editor/           # interactive TUI data editor (Textual)
+│       ├── app.py        # editor application, sidebar, exit dialog
+│       ├── schema.py     # field specs inferred from template.json + data
+│       └── widgets.py    # spec-driven rows, sections, skill columns
 ├── templates/
 │   ├── classic.html      # default Jinja2 template
 │   ├── nord.html
