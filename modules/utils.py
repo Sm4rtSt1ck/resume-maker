@@ -9,27 +9,26 @@ from pathlib import Path
 
 from rich.console import Console
 from rich.panel import Panel
+from rich.theme import Theme
 
 from modules.consts import BASE_DIR
 from modules.defaults import CONFIG_DEFAULTS
 
-console = Console(highlight=False)
-
+console = Console(highlight=True, theme=Theme.read(str(BASE_DIR / "styles.ini")))
 
 def show_error(msg: str) -> None:
-    console.print(Panel(msg, title="[bold]Error[/]", border_style="red", padding=(0, 1), title_align="left"))
+    console.print(Panel(msg, title="[bold]Error[/]", border_style="error", padding=(0, 1), title_align="left"))
 
 
 def show_warning(msg: str) -> None:
-    console.print(Panel(msg, title="[bold]Warning[/]", border_style="yellow", padding=(0, 1), title_align="left"))
+    console.print(Panel(msg, title="[bold]Warning[/]", border_style="warning", padding=(0, 1), title_align="left"))
 
 
 def show_success(msg: str, title: str = "Done") -> None:
-    console.print(Panel(msg, title=f"[bold]{title}[/]", border_style="green", padding=(0, 1), title_align="left"))
+    console.print(Panel(msg, title=f"[bold]{title}[/]", border_style="success", padding=(0, 1), title_align="left"))
 
 def show_info(msg: str, title: str | None = None) -> None:
-    console.print(Panel(msg, title=f"[bold]{title}[/]" if title else None, border_style="blue", padding=(0, 1), title_align="left"))
-
+    console.print(Panel(msg, title=f"[bold]{title}[/]" if title else None, border_style="info", padding=(0, 1), title_align="left"))
 
 def show_cancelled() -> None:
     console.print(Panel("[dim]No changes were made.[/]", title="[bold dim]Cancelled[/]", border_style="dim", padding=(0, 1), title_align="left"))

@@ -30,7 +30,7 @@ from modules.utils import (
 
 def command_make(position: str, data_file: str | None, template: str | None, config: dict):
     if data_file is None:
-        show_error("No data file specified. Use [bold]--data-file[/] or set a default with the [bold]data[/] command.")
+        show_error("No data file specified. Use [highlight]--data-file[/] or set a default with the [highlight]data[/] command.")
         sys.exit(1)
     if not Path(BASE_DIR / "data" / f"{data_file}.json").exists():
         show_error(f"File '[bold]{escape(data_file)}[/]' not found.")
@@ -58,7 +58,7 @@ def command_make(position: str, data_file: str | None, template: str | None, con
 
         template_file = templates_dir / f"{template}.html"
         if not template_file.exists():
-            show_error(f"Template '[bold]{escape(template)}[/]' not found in {escape(str(templates_dir))}")
+            show_error(f"Template [highlight]{escape(template)}[/] not found in {escape(str(templates_dir))}")
             sys.exit(1)
 
         env = Environment(loader=FileSystemLoader(templates_dir))
@@ -158,7 +158,7 @@ def command_template(template_name: str | None, reset: bool, config: dict):
             files.remove(current)
             files.append(f"[green]{escape(current)}[/] (current)")
         else:
-            show_warning("Current template is [red]NOT SET[/].")
+            show_warning("Current template is [null]NOT SET[/].")
 
         console.rule("[bold magenta]Available templates[/]", style="dim magenta")
         for f in files:
@@ -169,23 +169,23 @@ def command_template(template_name: str | None, reset: bool, config: dict):
         if not template_file.exists():
             available = ", ".join(sorted(p.stem for p in templates_dir.glob("*.html")))
             show_error(
-                f"Template '[bold]{escape(template_name)}[/]' not found.\n"
-                f"Available: [cyan]{escape(available)}[/]"
+                f"Template [highlight]{escape(template_name)}[/] not found.\n"
+                f"Available: [info]{escape(available)}[/]"
             )
             sys.exit(1)
         write_config(config, "template", template_name)
-        show_success(f"Template set to [bold]{escape(template_name)}[/]", title="Updated")
+        show_success(f"Template set to [highlight]{escape(template_name)}[/]", title="Updated")
 
     elif reset:
         try:
             remove_from_config(config, "template")
             show_success(
-                f"Template reset to default: [bold]{escape(CONFIG_DEFAULTS['template'])}[/]",
+                f"Template reset to default: [highlight]{escape(CONFIG_DEFAULTS['template'])}[/]",
                 title="Reset",
             )
         except KeyError:
             show_info(
-                f"Template is already the default: [bold]{escape(CONFIG_DEFAULTS['template'])}[/]",
+                f"Template is already the default: [highlight]{escape(CONFIG_DEFAULTS['template'])}[/]",
                 title="No change",
             )
 
@@ -205,7 +205,7 @@ def command_search(position: str, config: dict):
     found = sorted(Path(output_dir).glob(pattern), key=os.path.getmtime, reverse=True)
 
     if not found:
-        show_warning(f"No files found for position '[bold]{escape(position)}[/]'.")
+        show_warning(f"No files found for position [highlight]{escape(position)}[/].")
         return
 
     lines = "\n".join(f"  [cyan]•[/] {clickable_path(f)}" for f in found)
@@ -220,38 +220,38 @@ def command_show(data_file: str | None, config: dict):
         pad = " " * indent
         if isinstance(value, dict):
             if not value:
-                return f"{pad}[red]NOT SET[/]"
+                return f"{pad}[null]NOT SET[/]"
             lines = []
             for key, item in value.items():
                 if isinstance(item, (dict, list)):
-                    lines.append(f"{pad}[cyan]{escape(key.capitalize())}[/]:")
+                    lines.append(f"{pad}[info]{escape(key.capitalize())}[/]:")
                     lines.append(format_data(item, indent + 2))
                 elif item is None or (isinstance(item, str) and item.strip() == ""):
-                    lines.append(f"{pad}[cyan]{escape(key.capitalize())}[/]: [red]NOT SET[/]")
+                    lines.append(f"{pad}[info]{escape(key.capitalize())}[/]: [null]NOT SET[/]")
                 else:
-                    lines.append(f"{pad}[cyan]{escape(key.capitalize())}[/]: {escape(str(item))}")
+                    lines.append(f"{pad}[info]{escape(key.capitalize())}[/]: {escape(str(item))}")
             return "\n".join(lines)
         if isinstance(value, list):
             if not value:
-                return f"{pad}[red]NOT SET[/]"
+                return f"{pad}[null]NOT SET[/]"
             lines = []
             for item in value:
                 if isinstance(item, (dict, list)):
                     lines.append(format_data(item, indent + 2))
                     lines.append("")
                 elif item is None or (isinstance(item, str) and item.strip() == ""):
-                    lines.append(f"{pad}[cyan]•[/] [red]NOT SET[/]")
+                    lines.append(f"{pad}[info]•[/] [null]NOT SET[/]")
                 else:
-                    lines.append(f"{pad}[cyan]•[/] {escape(str(item))}")
+                    lines.append(f"{pad}[info]•[/] {escape(str(item))}")
             return "\n".join(lines)
         if value is None or (isinstance(value, str) and value.strip() == ""):
-            return f"{pad}[red]NOT SET[/]"
+            return f"{pad}[null]NOT SET[/]"
         return f"{pad}{escape(str(value))}"
 
     name = data_file or config.get("data_file", "data")
     path = BASE_DIR / f"data/{name}.json"
     if not path.exists():
-        show_error(f"Data '[bold]{escape(name)}[/]' does not exist.")
+        show_error(f"Data [highlight]{escape(name)}[/] does not exist.")
         sys.exit(1)
 
     with open(path, encoding="utf-8") as f:
@@ -259,8 +259,8 @@ def command_show(data_file: str | None, config: dict):
 
     console.print(Panel(
         format_data(data),
-        title=f"[bold magenta]{escape(name.upper())}[/]",
-        border_style="magenta",
+        title=f"[bold frame]{escape(name.upper())}[/]",
+        border_style="frame",
     ))
 
 
@@ -271,7 +271,7 @@ def command_browser(state: str | None, config: dict):
         show_info(f"Auto-open in browser is [{color}]{val}[/]", title="Browser")
         return
     write_config(config, "auto_open", state == "on")
-    show_success(f"Auto-open in browser turned [bold]{'ON' if state == 'on' else 'OFF'}[/]", title="Updated")
+    show_success(f"Auto-open in browser turned [highlight]{'ON' if state == 'on' else 'OFF'}[/]", title="Updated")
 
 
 def command_pdf(state: str | None, config: dict):
@@ -281,14 +281,14 @@ def command_pdf(state: str | None, config: dict):
         show_info(f"Auto-conversion to PDF is [{color}]{val}[/]", title="PDF")
         return
     write_config(config, "convert_to_pdf", state == "on")
-    show_success(f"Auto-conversion to PDF turned [bold]{'ON' if state == 'on' else 'OFF'}[/]", title="Updated")
+    show_success(f"Auto-conversion to PDF turned [highlight]{'ON' if state == 'on' else 'OFF'}[/]", title="Updated")
 
 
 def command_edit(data: str | None, config: dict):
     name = data or config.get("data_file", "data")
     target = BASE_DIR / f"data/{name}.json"
     if not target.exists():
-        show_error(f"Data '[bold]{escape(name)}[/]' does not exist.")
+        show_error(f"Data [highlight]{escape(name)}[/] does not exist.")
         sys.exit(1)
 
     try:
@@ -297,7 +297,7 @@ def command_edit(data: str | None, config: dict):
         if not isinstance(content, dict):
             raise ValueError("root must be a JSON object")
     except (json.JSONDecodeError, ValueError) as e:
-        show_error(f"'[bold]{escape(name)}[/]' is not a valid data file: {escape(str(e))}")
+        show_error(f"'[highlight]{escape(name)}[/]' is not a valid data file: {escape(str(e))}")
         sys.exit(1)
 
     from modules.editor import run_editor
@@ -313,7 +313,7 @@ def command_rename(old_name: str, new_name: str, config: dict):
     new_path = BASE_DIR / f"data/{new_name}.json"
 
     if new_path.exists():
-        show_error(f"'[bold]{escape(new_name)}[/]' already exists. Choose another name.")
+        show_error(f"'[highlight]{escape(new_name)}[/]' already exists. Choose another name.")
         sys.exit(1)
 
     if old_path.exists():
@@ -321,24 +321,24 @@ def command_rename(old_name: str, new_name: str, config: dict):
         if config.get("data_file") == old_name:
             write_config(config, "data_file", new_name)
         show_success(
-            f"[bold]{escape(old_name)}[/] → [bold]{escape(new_name)}[/]",
+            f"[highlight]{escape(old_name)}[/] → [highlight]{escape(new_name)}[/]",
             title="Renamed",
         )
     else:
-        show_error(f"'[bold]{escape(old_name)}[/]' does not exist.")
+        show_error(f"'[highlight]{escape(old_name)}[/]' does not exist.")
         sys.exit(1)
 
 
 def command_new(data: str, copy: str | None, config: dict):
     target = BASE_DIR / f"data/{data}.json"
     if target.exists():
-        show_error(f"Data '[bold]{escape(data)}[/]' already exists.")
+        show_error(f"Data [highlight]{escape(data)}[/] already exists.")
         sys.exit(1)
 
     if copy:
         source = BASE_DIR / f"data/{copy}.json"
         if not source.exists():
-            show_error(f"Source data '[bold]{escape(copy)}[/]' does not exist.")
+            show_error(f"Source data [highlight]{escape(copy)}[/] does not exist.")
             sys.exit(1)
         with open(source, encoding="utf-8") as f:
             template_data = json.load(f)
@@ -354,26 +354,26 @@ def command_new(data: str, copy: str | None, config: dict):
     with open(target, "w", encoding="utf-8") as f:
         json.dump(template_data, f, indent=4, ensure_ascii=False)
 
-    show_success(f"Data file '[bold]{escape(data)}[/]' created.", title="Created")
+    show_success(f"Data file '[highlight]{escape(data)}[/]' created.", title="Created")
     command_data(data, config)
 
 
 def command_remove(data: str, config: dict):
     target = BASE_DIR / f"data/{data}.json"
     if not target.exists():
-        show_error(f"Data file '[bold]{escape(data)}[/]' does not exist.")
+        show_error(f"Data file [highlight]{escape(data)}[/] does not exist.")
         sys.exit(1)
 
-    if not Confirm.ask(f"Remove '[bold cyan]{escape(data)}[/]'?", default=False):
+    if not Confirm.ask(f"Remove [highlight]{escape(data)}[/]?", default=False):
         show_cancelled()
         return
     try:
         os.remove(target)
-        show_success(f"Data '[bold]{escape(data)}[/]' removed.", title="Removed")
+        show_success(f"Data [highlight]{escape(data)}[/] removed.", title="Removed")
         if config.get("data_file") == data:
             remove_from_config(config, "data_file")
     except Exception as e:
-        show_error(f"Could not remove '[bold]{escape(data)}[/]': {escape(str(e))}")
+        show_error(f"Could not remove [highlight]{escape(data)}[/]: {escape(str(e))}")
 
 
 def command_export(path: str, data: tuple[str, ...], config: dict):
@@ -389,7 +389,7 @@ def command_export(path: str, data: tuple[str, ...], config: dict):
         for name in data:
             f = BASE_DIR / "data" / f"{name}.json"
             if not f.exists():
-                show_error(f"Data '[bold]{escape(name)}[/]' does not exist.")
+                show_error(f"Data [highlight]{escape(name)}[/] does not exist.")
                 sys.exit(1)
             files_to_export.append(f)
             try:
@@ -398,7 +398,7 @@ def command_export(path: str, data: tuple[str, ...], config: dict):
                 if pf.exists():
                     files_to_export.append(pf)
                 else:
-                    show_warning(f"Photo '[bold]{escape(photo_name)}[/]' not found — skipping.")
+                    show_warning(f"Photo [highlight]{escape(photo_name)}[/] not found — skipping.")
             except (KeyError, json.JSONDecodeError):
                 pass
     else:
@@ -408,7 +408,7 @@ def command_export(path: str, data: tuple[str, ...], config: dict):
             sys.exit(1)
         f = BASE_DIR / "data" / f"{default}.json"
         if not f.exists():
-            show_error(f"Data '[bold]{escape(default)}[/]' does not exist.")
+            show_error(f"Data [highlight]{escape(default)}[/] does not exist.")
             sys.exit(1)
         files_to_export = [f]
         try:
@@ -417,12 +417,12 @@ def command_export(path: str, data: tuple[str, ...], config: dict):
             if pf.exists():
                 files_to_export.append(pf)
             else:
-                show_warning(f"Photo '[bold]{escape(photo_name)}[/]' not found — skipping.")
+                show_warning(f"Photo [highlight]{escape(photo_name)}[/] not found — skipping.")
         except (KeyError, json.JSONDecodeError):
             pass
 
     if export_path.exists() and not export_path.is_dir():
-        show_error(f"'{escape(str(export_path))}' already exists as a file.")
+        show_error(f"[highlight]{escape(str(export_path))}[/] already exists as a file.")
         sys.exit(1)
     os.makedirs(export_path, exist_ok=True)
     for src in files_to_export:
@@ -437,12 +437,12 @@ def command_import(path: str):
     image_exts = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"}
 
     if not source.exists():
-        show_error(f"'[bold]{escape(str(source))}[/]' does not exist.")
+        show_error(f"[highlight]{escape(str(source))}[/] does not exist.")
         sys.exit(1)
 
     def _copy(src: Path, dst: Path):
         if dst.exists():
-            if not Confirm.ask(f"'[bold]{escape(dst.name)}[/]' already exists. Overwrite?", default=False):
+            if not Confirm.ask(f"[highlight]{escape(dst.name)}[/] already exists. Overwrite?", default=False):
                 console.print(f"  [dim]Skipped:[/] {escape(src.name)}")
                 return
         shutil.copy2(src, dst)
@@ -452,13 +452,13 @@ def command_import(path: str):
         files = [f for f in source.iterdir()
                  if f.suffix.lower() in image_exts or f.suffix.lower() == ".json"]
         if not files:
-            show_error(f"No JSON or image files found in '[bold]{escape(str(source))}[/]'.")
+            show_error(f"No JSON or image files found in [highlight]{escape(str(source))}[/].")
             sys.exit(1)
         for f in files:
             _copy(f, dest_dir / f.name)
     else:
         if not (source.suffix.lower() in image_exts or source.suffix.lower() == ".json"):
-            show_error(f"'[bold]{escape(source.name)}[/]' is not a JSON or image file.")
+            show_error(f"[highlight]{escape(source.name)}[/] is not a JSON or image file.")
             sys.exit(1)
         _copy(source, dest_dir / source.name)
         if source.suffix.lower() == ".json":
@@ -468,7 +468,7 @@ def command_import(path: str):
                 if photo_src.exists():
                     _copy(photo_src, dest_dir / photo_src.name)
                 else:
-                    show_warning(f"Photo '[bold]{escape(photo_name)}[/]' not found — skipping.")
+                    show_warning(f"Photo [highlight]{escape(photo_name)}[/] not found — skipping.")
             except (KeyError, json.JSONDecodeError):
                 pass
 
@@ -491,7 +491,7 @@ def command_convert(name: str | None, output_path: str | None, config: dict):
     pdf_path = (out / Path(html_path).name).with_suffix(".pdf")
 
     if pdf_path.exists():
-        if not Confirm.ask(f"'[bold]{escape(str(pdf_path))}[/]' already exists. Overwrite?", default=False):
+        if not Confirm.ask(f"[highlight]{escape(str(pdf_path))}[/] already exists. Overwrite?", default=False):
             show_cancelled()
             return
 
@@ -516,7 +516,7 @@ def command_config(config: dict):
     data_file = config.get("data_file")
     enabled = lambda v: "[green]enabled[/]" if v else "[red]disabled[/]"
 
-    table = Table(show_header=True, header_style="bold magenta", box=box.ROUNDED)
+    table = Table(show_header=True, border_style="frame", header_style="bold magenta", box=box.ROUNDED)
     table.add_column("COMMAND", style="bold cyan", no_wrap=True)
     table.add_column("PARAMETER", style="white")
     table.add_column("VALUE")
