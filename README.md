@@ -53,6 +53,7 @@ sudo ln -sf "$(pwd)/remaker" /usr/local/bin/remaker
     [Environment]::GetEnvironmentVariable("Path", "User") + ";" + $PWD.Path,
     "User"
 )
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 ```
 or via GUI:
 
