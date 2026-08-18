@@ -26,8 +26,10 @@ python -m venv venv
 # Linux / macOS
 source venv/bin/activate
 
-# Windows
+# Windows from cmd
 venv\Scripts\activate.bat
+# Windows from PowerShell
+venv\Scripts\Activate.ps1
 ```
 
 ```bash
@@ -43,7 +45,16 @@ chmod +x remaker
 sudo ln -sf "$(pwd)/remaker" /usr/local/bin/remaker
 ```
 
-**Windows** - add the project directory to your `PATH`:
+**Windows** - add the project directory to your `PATH` using PowerShell:
+
+```powershell
+[Environment]::SetEnvironmentVariable(
+    "Path",
+    [Environment]::GetEnvironmentVariable("Path", "User") + ";" + $PWD.Path,
+    "User"
+)
+```
+or via GUI:
 
 1. Open **System Properties → Advanced → Environment Variables**
 2. Under **User variables**, select `Path` → **Edit → New**
